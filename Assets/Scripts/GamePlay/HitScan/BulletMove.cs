@@ -1,0 +1,51 @@
+using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using UnityEngine;
+
+public class BulletMove : MonoBehaviour
+{
+    [SerializeField] Rigidbody2D _rigidbody2D;
+    [SerializeField] CircleCollider2D _circleCollider2D;
+
+    private CancellationTokenSource _tokenSource;
+    
+    private float _bulletSpeed;
+    private Vector2 _direction;
+    private bool _isReady = false;
+    public void Init(float bulletSpeed, Vector2 direction, Vector2 startPosition, float distance)
+    {
+        _bulletSpeed = bulletSpeed;
+        _direction = direction;
+        transform.position = startPosition;
+
+
+        _tokenSource?.Cancel();
+        _tokenSource?.Dispose();
+
+        _tokenSource = new CancellationTokenSource();
+        
+        float lifeTime = distance / _bulletSpeed;
+        DestroyAfterDelay(lifeTime, _tokenSource.Token).Forget();
+        
+        gameObject.SetActive(true);
+        _isReady = true;
+    }
+
+    private async UniTask DestroyAfterDelay(float delay, CancellationToken token)
+    {
+        await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: token);
+        PoolManager.instance.ReturnBullet(this);
+    }
+    void FixedUpdate()
+    {
+        if (!_isReady) return;
+        
+        _rigidbody2D.linearVelocity = _direction * _bulletSpeed;
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        
+    }
+}
