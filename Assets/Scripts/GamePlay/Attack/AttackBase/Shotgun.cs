@@ -8,11 +8,11 @@ public class Shotgun : AttackBase
     {
         for (int index = 0; index < curStatData.BulletNum_PerShot; index++)
         {
-            BulletMove newBullet = PoolManager.instance.GetBullet();
+            BulletMove newBullet = _poolManager.GetObject();
             float randomAngle = Random.Range(-spread / 2f, spread / 2f);
             Vector2 randomDir = RotateVector(direction, randomAngle);
             float randomSpeed = Random.Range(curStatData.BulletSpeed - (curStatData.BulletSpeed / 100 * randomSpeedRate), curStatData.BulletSpeed);
-            newBullet.Init(randomSpeed, randomDir, startPosition, curStatData.BulletDistance);
+            newBullet.Init(randomSpeed, randomDir, startPosition, curStatData.BulletDistance, _poolManager);
         }
     }
     

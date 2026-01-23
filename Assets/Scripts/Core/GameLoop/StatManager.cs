@@ -8,15 +8,16 @@ public class StatManager : MonoBehaviour
     private BulletStatData _bulletStatData;
     private IAttack _curWeapon;
     private DataManager _dataManager;
+    private IPoolManager _poolManager;
     
     private AddPlayerStatData _addPlayerStatData;
     private AddBulletStatData _addBulletStatData;
     
     #region Init
-    public void Init(DataManager dataManager, WeaponType type)
+    public void Init(DataManager dataManager, IPoolManager poolManager, WeaponType type)
     {
         _dataManager = dataManager;
-        
+        _poolManager = poolManager;
         SetPlayerData();
         SetWeaponData(type);
     }

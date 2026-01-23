@@ -13,12 +13,14 @@ public class BulletMove : MonoBehaviour
     private float _bulletSpeed;
     private Vector2 _direction;
     private bool _isReady = false;
-    public void Init(float bulletSpeed, Vector2 direction, Vector2 startPosition, float distance)
+    
+    IPoolManager _poolManager;
+    public void Init(float bulletSpeed, Vector2 direction, Vector2 startPosition, float distance, IPoolManager poolManager)
     {
         _bulletSpeed = bulletSpeed;
         _direction = direction;
         transform.position = startPosition;
-
+        _poolManager = poolManager;
 
         _tokenSource?.Cancel();
         _tokenSource?.Dispose();
@@ -35,7 +37,7 @@ public class BulletMove : MonoBehaviour
     private async UniTask DestroyAfterDelay(float delay, CancellationToken token)
     {
         await UniTask.Delay(TimeSpan.FromSeconds(delay), cancellationToken: token);
-        PoolManager.instance.ReturnBullet(this);
+        _poolManager.ReturnObject(this);
     }
     void FixedUpdate()
     {

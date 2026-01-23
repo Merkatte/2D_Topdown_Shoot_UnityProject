@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.Pool; 
 
-public class PoolManager : MonoBehaviour
+public class PoolManager : MonoBehaviour, IPoolManager
 {
-    public static PoolManager instance;
+    public static IPoolManager instance;
     [SerializeField] private BulletMove bulletMove;
     [SerializeField] private BulletMove shotGunMove;
 
@@ -13,7 +13,9 @@ public class PoolManager : MonoBehaviour
     #region Init
     public void Init()
     {
-        instance = this;
+        if(instance == null)
+            instance = this;
+         
         _bulletPool = new ObjectPool<BulletMove>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy);
         //_shotgunPool = new ObjectPool<BulletMove>(CreateFunc, ActionOnGet, ActionOnRelease, ActionOnDestroy);
     }
@@ -30,7 +32,7 @@ public class PoolManager : MonoBehaviour
 
     private void ActionOnGet(BulletMove obj)
     {
-        //obj.gameObject.SetActive(true);
+        
     }
 
     private BulletMove CreateFunc()
@@ -39,6 +41,6 @@ public class PoolManager : MonoBehaviour
         return newBullet;
     }
 
-    public BulletMove GetBullet() => _bulletPool.Get();
-    public void ReturnBullet(BulletMove bullet) => _bulletPool.Release(bullet);
+    public BulletMove GetObject() => _bulletPool.Get();
+    public void ReturnObject(BulletMove bullet) => _bulletPool.Release(bullet);
 }

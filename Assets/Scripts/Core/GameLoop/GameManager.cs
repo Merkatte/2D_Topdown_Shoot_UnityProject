@@ -33,7 +33,7 @@ public class GameManager : MonoBehaviour
         inputManager.Init();
         
         //GameData Init
-        statManager.Init(dataManager, weaponType);
+        statManager.Init(dataManager, poolManager, weaponType);
         unitManager.Init(inputManager, statManager);
     }
 
