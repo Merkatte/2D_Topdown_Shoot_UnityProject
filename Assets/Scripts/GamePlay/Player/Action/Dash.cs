@@ -34,7 +34,7 @@ public class Dash : IDisposable {
         _dashDuration = dashDuration;
         _onStartDash = onStartDash;
         _onEndDash = onEndDash;
-        
+        Debug.Log(_dashDuration);
         SubscribeToInput();
     }
 
@@ -48,6 +48,7 @@ public class Dash : IDisposable {
         else return;
         _curDashDuration = _initDashDuration;
         _targetDirection = direction;
+        _rigidbody2D.linearVelocity = Vector2.zero;
         _onStartDash();
     }
 

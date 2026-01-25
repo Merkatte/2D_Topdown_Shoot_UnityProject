@@ -22,7 +22,7 @@ public class AttackBase : IAttack
 
     protected virtual void Attack(Vector2 startPosition, Vector2 direction)
     {
-        BulletMove bullet = _poolManager.GetObject();
+        BulletMove bullet = _poolManager.GetBulletMove();
         bullet.Init(curStatData.BulletSpeed, direction, startPosition, curStatData.BulletDistance, _poolManager);
     }
 }

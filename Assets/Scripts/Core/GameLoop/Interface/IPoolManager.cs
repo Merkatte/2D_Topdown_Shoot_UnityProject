@@ -2,6 +2,8 @@ using UnityEngine;
 
 public interface IPoolManager
 {
-    public BulletMove GetObject();
-    public void ReturnObject(BulletMove obj);
+    public BulletMove GetBulletMove();
+    public Enemy GetEnemy();
+    public void ReturnBullet(BulletMove obj);
+    public void ReturnEnemy(Enemy obj);
 }

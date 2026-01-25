@@ -653,7 +653,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitManager
   player: {fileID: 834924194}
-  noSpawnArea: 0
+  noSpawnArea: 40
+  spawnDelay: 0
+  maxSpawnDelay: 0
+  maxSpawnCount: 50
 --- !u!1 &1113431142
 GameObject:
   m_ObjectHideFlags: 0
@@ -698,8 +701,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52aad43d2a73c08469b3a9ef0a7d93df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DataManager
-  _playerRepo: {fileID: 11400000, guid: 22f60e6647fe7a64fae2b20b1c95ac79, type: 2}
-  _weaponRepo: {fileID: 11400000, guid: b956bd7633e2bb74b8cdf6a299c308d4, type: 2}
+  playerRepo: {fileID: 11400000, guid: 22f60e6647fe7a64fae2b20b1c95ac79, type: 2}
+  weaponRepo: {fileID: 11400000, guid: b956bd7633e2bb74b8cdf6a299c308d4, type: 2}
+  enemyRepo: {fileID: 11400000, guid: 3b822f4ed38ede84f94ef1c3c193b068, type: 2}
 --- !u!1 &1503407649
 GameObject:
   m_ObjectHideFlags: 0
@@ -734,7 +738,7 @@ MonoBehaviour:
   dataManager: {fileID: 1113431144}
   unitManager: {fileID: 1080606333}
   inputManager: {fileID: 2127925744}
-  weaponType: 2
+  weaponType: 0
 --- !u!4 &1503407651
 Transform:
   m_ObjectHideFlags: 0
@@ -786,6 +790,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PoolManager
   bulletMove: {fileID: -266298431824955149, guid: a6b2b1b95202efe4b826f3a76541fb0d, type: 3}
   shotGunMove: {fileID: -908435014120537857, guid: c5c045589cba61c4ca2e075b8c16e8a8, type: 3}
+  enemy: {fileID: -414237507542734016, guid: 39eb171ec3cc66b468b642a1332c2c63, type: 3}
 --- !u!4 &1613149961
 Transform:
   m_ObjectHideFlags: 0

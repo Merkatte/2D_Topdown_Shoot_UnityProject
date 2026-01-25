@@ -12,3 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27bcdba8cd46fc749b63f85f7caa8494, type: 3}
   m_Name: EnemyRepo
   m_EditorClassIdentifier: Assembly-CSharp::EnemyRepo
+  Health: 100
+  Armor: 10
+  MoveSpeed: 2
+  Acceleration: 0
+  Deceleration: 0

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe41ae851db11d84d848b4382d77405b, type: 3}
   m_Name: Pistol
   m_EditorClassIdentifier: Assembly-CSharp::BulletConfig
-  Damage: 20
-  Speed: 20
+  Damage: 1
+  BulletSpeed: 20
   KnockBack: 0
   BulletDistance: 10
   FireRate: 1000

@@ -5,12 +5,17 @@ using UnityEngine;
 public class StatManager : MonoBehaviour
 {
     private PlayerStatData _playerStatData;
+    
+    private EnemyStatData _enemyStatData;
+    
     private BulletStatData _bulletStatData;
-    private IAttack _curWeapon;
+    
     private DataManager _dataManager;
+    private IAttack _curWeapon;
     private IPoolManager _poolManager;
     
     private AddPlayerStatData _addPlayerStatData;
+    private AddEnemyStatData _addEnemyStatData;
     private AddBulletStatData _addBulletStatData;
     
     #region Init
@@ -20,6 +25,7 @@ public class StatManager : MonoBehaviour
         _poolManager = poolManager;
         SetPlayerData();
         SetWeaponData(type);
+        SetEnemyData();
     }
     #endregion
     
@@ -38,6 +44,13 @@ public class StatManager : MonoBehaviour
         _curWeapon = weaponData.Weapon;
     }
 
+    void SetEnemyData()
+    {
+        EnemyRepo enemyRepo = _dataManager.GetEnemyRepo();
+        _enemyStatData = new EnemyStatData(enemyRepo);
+        _addEnemyStatData = AddEnemyStatData.Zero;
+    }
+
     PlayerStatData CalculatePlayerStatData(AddPlayerStatData addStatData = default)
     {
         AddPlayerStatData playerStatData = AddPlayerStatData.Zero;
@@ -48,6 +61,7 @@ public class StatManager : MonoBehaviour
         playerStatData.Acceleration = _playerStatData.Acceleration + addStatData.Acceleration;
         playerStatData.Deceleration = _playerStatData.Deceleration + addStatData.Deceleration;
         playerStatData.DashSpeed = _playerStatData.DashSpeed + addStatData.DashSpeed;
+        playerStatData.DashDuration = _playerStatData.DashDuration + addStatData.DashDuration;
         playerStatData.RequestDashStamina = playerStatData.RequestDashStamina;
 
         return new PlayerStatData(playerStatData);
@@ -65,6 +79,18 @@ public class StatManager : MonoBehaviour
         
         return new BulletStatData(bulletStatData);
     }
+
+    EnemyStatData CalculateEnemyStatData(AddEnemyStatData addStatData = default)
+    {
+        AddEnemyStatData enemyStatData = AddEnemyStatData.Zero;
+        enemyStatData.AddHealth = _enemyStatData.Health + addStatData.AddHealth;
+        enemyStatData.AddArmor = _enemyStatData.Armor + addStatData.AddArmor;
+        enemyStatData.AddMoveSpeed = _enemyStatData.MoveSpeed + addStatData.AddMoveSpeed;
+        enemyStatData.AddAcceleration = _enemyStatData.Acceleration;
+        enemyStatData.AddDeceleration = _enemyStatData.Deceleration;
+
+        return new EnemyStatData(enemyStatData);
+    }
     #endregion
     
     #region public
@@ -77,31 +103,31 @@ public class StatManager : MonoBehaviour
     {
         return CalculatePlayerStatData();
     }
-    
-    public BulletStatData GetBulletStatData()
-    {
-        AddBulletStatData bulletStatData = AddBulletStatData.Zero;
-        bulletStatData.AddDamage = _bulletStatData.Damage + _addBulletStatData.AddDamage;
-        bulletStatData.AddBulletSpeed =  _bulletStatData.BulletSpeed + _addBulletStatData.AddBulletSpeed;
-        bulletStatData.AddKnockBack = _bulletStatData.KnockBack + _addBulletStatData.AddKnockBack;
-        bulletStatData.AddBulletDistance = _bulletStatData.BulletDistance + _addBulletStatData.AddBulletDistance;
-        bulletStatData.AddFireRate = _bulletStatData.FireRate + _addBulletStatData.AddFireRate;
-        bulletStatData.AddBulletNum_PerShot = _bulletStatData.BulletNum_PerShot + _addBulletStatData.AddBulletNum_PerShot;
-
-        return new BulletStatData(bulletStatData);
-    }
 
     public (BulletStatData, IAttack) GetBulletOriginData()
     {
         return (CalculateBulletStatData(), _curWeapon);
     }
 
+    public BulletStatData GetBulletTotalStatData()
+    {
+        return CalculateBulletStatData(_addBulletStatData);
+    }
+
+    public EnemyStatData GetEnemyOriginData()
+    {
+        return CalculateEnemyStatData();
+    }
+
+    public EnemyStatData GetEnemyTotalData()
+    {
+        return CalculateEnemyStatData(_addEnemyStatData);
+    }
     public PlayerStatData ChangePlayerStatData()
     {
         //TODO : Should Add Stat Change Logic
         return _playerStatData;
     }
-
     public BulletStatData ChangeBulletStatData()
     {
         //TODO : Should Add Stat Change Logic

@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviour
         
         //GameData Init
         statManager.Init(dataManager, poolManager, weaponType);
-        unitManager.Init(inputManager, statManager);
+        unitManager.Init(this, inputManager, statManager, poolManager);
     }
 
     void StartGame()
@@ -44,5 +44,10 @@ public class GameManager : MonoBehaviour
     #endregion
     
     #region public
+
+    public void GameOver()
+    {
+        
+    }
     #endregion
 }

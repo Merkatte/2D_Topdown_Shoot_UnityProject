@@ -15,9 +15,9 @@ MonoBehaviour:
   Health: 100
   Stamina: 100
   Armor: 10
-  MoveSpeed: 10
-  Acceleration: 5
-  Deceleration: 5
+  MoveSpeed: 5
+  Acceleration: 4
+  Deceleration: 6
   DashSpeed: 10
-  DashDuration: 0.5
+  DashDuration: 0.3
   RequestDashStamina: 10
