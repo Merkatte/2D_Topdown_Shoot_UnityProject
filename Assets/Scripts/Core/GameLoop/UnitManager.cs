@@ -23,14 +23,14 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private StatManager _statManager;
     private PoolManager _poolManager;
     
-
     private CancellationTokenSource _tokenSource;
+    
     #region Init
-
     public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager)
     {
         instance = this;
-        
+
+        _gameManager = gameManager;
         _inputManager = inputManager;
         _statManager = statManager;
         _poolManager = poolManager;

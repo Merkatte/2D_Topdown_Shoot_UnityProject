@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
             _rigidbody2D,
             playerStatData
         );
-        Debug.Log(playerStatData.DashDuration);
+
         _dash = new Dash(
             playerInput,
             _rigidbody2D,
