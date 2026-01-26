@@ -23,11 +23,12 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private InputManager _inputManager;
     private StatManager _statManager;
     private PoolManager _poolManager;
+    private UIManager _uiManager;
     
     private CancellationTokenSource _tokenSource;
     
     #region Init
-    public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager)
+    public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager, UIManager uiManager)
     {
         instance = this;
 
@@ -35,7 +36,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _inputManager = inputManager;
         _statManager = statManager;
         _poolManager = poolManager;
-
+        _uiManager = uiManager;
+        
         _enemiesDict = new Dictionary<int, Enemy>();
     }
 
@@ -64,7 +66,9 @@ public class UnitManager : MonoBehaviour, IUnitManager
 
     private void RegisterEnemy(Enemy enemy)
     {
-        _enemiesDict[enemy.gameObject.GetInstanceID()] = enemy;
+        int instanceID = enemy.gameObject.GetInstanceID();
+        _enemiesDict[instanceID] = enemy;
+        _uiManager.SetHP(instanceID, enemy.GetHealthAnchor());
         enemy.Init(_statManager.GetEnemyTotalData(), player.gameObject, OnUnitDie);
     }
     #endregion
@@ -101,7 +105,9 @@ public class UnitManager : MonoBehaviour, IUnitManager
         if (!_enemiesDict.ContainsKey(instanceID))
             return;
         
-        _enemiesDict[instanceID].OnHit(10);
+        Enemy enemyInfo =  _enemiesDict[instanceID];
+        enemyInfo.OnHit(10);
+        _uiManager.ChangeHP(enemyInfo.GetCurHP() / enemyInfo.GetTotalHP(), instanceID);
     }
 
     void OnUnitDie(int instanceID)
@@ -111,8 +117,10 @@ public class UnitManager : MonoBehaviour, IUnitManager
             _gameManager.GameOver();
             return;
         }
+        
+        _uiManager.ReleaseHP(instanceID);
         _poolManager.ReturnEnemy(_enemiesDict[instanceID]);
-        //_enemiesDict.Remove(instanceID);
+        _enemiesDict.Remove(instanceID);
     }
 
     #endregion

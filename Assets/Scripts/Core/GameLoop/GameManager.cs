@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private DataManager dataManager;
     [SerializeField] private UnitManager unitManager;
     [SerializeField] private InputManager inputManager;
+    [SerializeField] private UIManager uiManager;
 
     [Header("WeaponType")] 
     [SerializeField] private WeaponType weaponType;
@@ -34,7 +35,10 @@ public class GameManager : MonoBehaviour
         
         //GameData Init
         statManager.Init(dataManager, poolManager, weaponType);
-        unitManager.Init(this, inputManager, statManager, poolManager);
+        unitManager.Init(this, inputManager, statManager, poolManager, uiManager);
+        
+        //UI Init
+        uiManager.Init(poolManager);
     }
 
     void StartGame()

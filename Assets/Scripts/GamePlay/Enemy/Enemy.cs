@@ -4,6 +4,7 @@ using UnityEngine;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private Rigidbody2D rigidBody2D;
+    [SerializeField] private GameObject healthBarAnchor;
     
     private EnemyStatData _myStatData;
     private GameObject _myTargetObject;
@@ -18,6 +19,8 @@ public class Enemy : MonoBehaviour
         _myTargetObject = targetObject;
         _myHP = enemyStatData.Health;
         _onUnitDie = onUnitDie;
+        
+        gameObject.SetActive(true);
         _isReady = true;
     }
     #endregion
@@ -37,6 +40,9 @@ public class Enemy : MonoBehaviour
     #endregion
     
     #region public
+    public float GetCurHP() => _myHP;
+    public float GetTotalHP() => _myStatData.Health;
+    public GameObject GetHealthAnchor() => healthBarAnchor;
     #endregion
     
     #region event
