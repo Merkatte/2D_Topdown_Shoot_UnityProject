@@ -2,17 +2,18 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
-
+using Game.Utils;
 public class UnitManager : MonoBehaviour, IUnitManager
 {
     public static IUnitManager instance; 
     [SerializeField] private Player player;
-    
-
+    [SerializeField] private Vector2 minSpawnPoint;
+    [SerializeField] private Vector2 maxSpawnPoint;
     [SerializeField] private float noSpawnArea;
     [SerializeField] private int spawnDelay;
     [SerializeField] private int maxSpawnDelay;
     [SerializeField] private int maxSpawnCount;
+    
     private const int SPAWN_RATE_PER_ONCE = 2;
     
     private Dictionary<int, Enemy> _enemiesDict;
@@ -54,6 +55,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
             for (int index = 0; index < spawnEnemyCount; ++index)
             {
                 Enemy newEnemy = _poolManager.GetEnemy();
+                newEnemy.transform.position = SpawnPointCalculator.GetRandomSpawnPosition(minSpawnPoint, maxSpawnPoint,
+                    player.transform.position, noSpawnArea);
                 RegisterEnemy(newEnemy);
             }
         }

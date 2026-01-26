@@ -653,10 +653,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitManager
   player: {fileID: 834924194}
-  noSpawnArea: 40
+  minSpawnPoint: {x: -10, y: -5}
+  maxSpawnPoint: {x: 10, y: 5}
+  noSpawnArea: 5
   spawnDelay: 0
   maxSpawnDelay: 0
-  maxSpawnCount: 50
+  maxSpawnCount: 10
 --- !u!1 &1113431142
 GameObject:
   m_ObjectHideFlags: 0
