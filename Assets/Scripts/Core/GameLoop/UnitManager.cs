@@ -17,6 +17,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private const int SPAWN_RATE_PER_ONCE = 2;
     
     private Dictionary<int, Enemy> _enemiesDict;
+    private Dictionary<int, EnemyStatData> _enemiesStatDict;
     private float _playerHP;
 
     private GameManager _gameManager;
@@ -39,6 +40,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _uiManager = uiManager;
         
         _enemiesDict = new Dictionary<int, Enemy>();
+        _enemiesStatDict = new Dictionary<int, EnemyStatData>();
     }
 
     #endregion
@@ -67,9 +69,11 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private void RegisterEnemy(Enemy enemy)
     {
         int instanceID = enemy.gameObject.GetInstanceID();
+        EnemyStatData enemyStatData = _statManager.GetEnemyTotalData();
         _enemiesDict[instanceID] = enemy;
+        _enemiesStatDict[instanceID] = enemyStatData;
         _uiManager.SetHP(instanceID, enemy.GetHealthAnchor());
-        enemy.Init(_statManager.GetEnemyTotalData(), player.gameObject, OnUnitDie);
+        enemy.Init(enemyStatData, player.gameObject, OnUnitDie);
     }
     #endregion
 
@@ -96,17 +100,17 @@ public class UnitManager : MonoBehaviour, IUnitManager
 
     public void OnUnitHit(int instanceID)
     {
+        Enemy enemyInfo =  _enemiesDict[instanceID];
         if (player.gameObject.GetInstanceID() == instanceID)
         {
-            player.OnHit(10);
+            player.OnHit(_enemiesStatDict[instanceID].Damage); //TODO this magic number is for test only!!! must replace to stat data
             return;
         }
 
-        if (!_enemiesDict.ContainsKey(instanceID))
+        if (!_enemiesDict.ContainsKey(instanceID)) 
             return;
         
-        Enemy enemyInfo =  _enemiesDict[instanceID];
-        enemyInfo.OnHit(10);
+        enemyInfo.OnHit(_statManager.GetBulletTotalStatData().Damage); //TODO this magic number is for test only!!! must replace to stat data
         _uiManager.ChangeHP(enemyInfo.GetCurHP() / enemyInfo.GetTotalHP(), instanceID);
     }
 
@@ -121,6 +125,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _uiManager.ReleaseHP(instanceID);
         _poolManager.ReturnEnemy(_enemiesDict[instanceID]);
         _enemiesDict.Remove(instanceID);
+        _enemiesStatDict.Remove(instanceID);
     }
 
     #endregion

@@ -34,7 +34,7 @@ public class Dash : IDisposable {
         _dashDuration = dashDuration;
         _onStartDash = onStartDash;
         _onEndDash = onEndDash;
-        Debug.Log(_dashDuration);
+
         SubscribeToInput();
     }
 
