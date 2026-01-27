@@ -1,4 +1,6 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -11,6 +13,7 @@ public class Player : MonoBehaviour
     private float _maxHealth;
     
     private float _stamina;
+    private float _requestDashStamina;
     private float _maxStamina;
     
     //Action Components
@@ -22,11 +25,16 @@ public class Player : MonoBehaviour
     private Action<int> _onDie;
     
     private bool _isDash = false;
+    private bool _isStaminaRecovering = false;
+    
+    private CancellationTokenSource staminaRecoverTokenSource;
     #region Init
     public void Init(IPlayerInput playerInput, PlayerStatData playerStatData, (BulletStatData, IAttack) weaponData, Action<int> onDie)
     {
         _health = playerStatData.Health;
+        _requestDashStamina = playerStatData.RequestDashStamina;
         _stamina = playerStatData.Stamina;
+        _maxStamina = playerStatData.Stamina;
         _onDie = onDie;
         
         _movement = new Movement(
@@ -41,7 +49,8 @@ public class Player : MonoBehaviour
             playerStatData.DashSpeed,
             playerStatData.DashDuration,
             OnStartDash,
-            OnEndDash
+            OnEndDash,
+            CheckStamina
         );
 
         _aim = new Aim(playerInput);
@@ -50,6 +59,38 @@ public class Player : MonoBehaviour
     #endregion
     
     #region private
+
+    private void UseStamina()
+    {
+        _stamina -= _requestDashStamina;
+
+        if (!_isStaminaRecovering)
+        {
+            _isStaminaRecovering = true;
+            staminaRecoverTokenSource?.Cancel();
+            staminaRecoverTokenSource?.Dispose();
+            staminaRecoverTokenSource = new CancellationTokenSource();
+
+            RecoverStamina().Forget();
+        } 
+    }
+
+    private bool CheckStamina()
+    {
+        if (_stamina < _requestDashStamina)
+            return false;
+        return true;
+    }
+    private async UniTask RecoverStamina()
+    {
+        while (_stamina < _maxStamina)
+        {
+            await UniTask.Delay(1000, cancellationToken: staminaRecoverTokenSource.Token);
+            _stamina += 5;
+        }
+        _stamina = _maxStamina;
+        _isStaminaRecovering = false;
+    }
     private void FixedUpdate() {
         if(!_isDash)
             _movement?.FixedUpdate();
@@ -62,8 +103,20 @@ public class Player : MonoBehaviour
     
     #endregion
     #region Event
-    void OnStartDash() => _isDash = true;
-    void OnEndDash() => _isDash = false;
+
+    void OnStartDash()
+    {
+        if (CheckStamina())
+        {
+            UseStamina();
+            _isDash = true;
+        }
+    }
+
+    void OnEndDash()
+    {
+        _isDash = false;
+    }
     public void OnHit(float damage)
     {
         _health -= damage;

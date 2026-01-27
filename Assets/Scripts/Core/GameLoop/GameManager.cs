@@ -53,5 +53,11 @@ public class GameManager : MonoBehaviour
     {
         
     }
+
+    public void PlayerLevelUp()
+    {
+        Time.timeScale = 0;
+        
+    }
     #endregion
 }

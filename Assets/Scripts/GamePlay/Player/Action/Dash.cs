@@ -9,6 +9,7 @@ public class Dash : IDisposable {
 
     private readonly Action _onStartDash;
     private readonly Action _onEndDash;
+    private readonly Func<bool> _checkStamina;
 
     private readonly float _initDashDuration = 0f;
     
@@ -26,7 +27,8 @@ public class Dash : IDisposable {
         float dashSpeed,
         float dashDuration,
         Action onStartDash,
-        Action onEndDash
+        Action onEndDash,
+        Func<bool> checkStamina
     ) {
         _playerInput = playerInput;
         _rigidbody2D = rigidbody2D;
@@ -34,16 +36,20 @@ public class Dash : IDisposable {
         _dashDuration = dashDuration;
         _onStartDash = onStartDash;
         _onEndDash = onEndDash;
-
+        _checkStamina = checkStamina;
+        
         SubscribeToInput();
     }
 
     void SubscribeToInput() {
         _playerInput.OnDashPressed += OnStartDash;
     }
-
+    
     #region Action
-    private void OnStartDash(Vector2 direction) {
+    private void OnStartDash(Vector2 direction)
+    {
+        if (!_checkStamina()) return;
+        
         if (_ableToDash) _ableToDash = false;
         else return;
         _curDashDuration = _initDashDuration;
@@ -58,6 +64,7 @@ public class Dash : IDisposable {
     }
     
     #endregion
+    
     
     #region Public
     public void FixedUpdate() {

@@ -62,7 +62,7 @@ public class StatManager : MonoBehaviour
         playerStatData.Deceleration = _playerStatData.Deceleration + addStatData.Deceleration;
         playerStatData.DashSpeed = _playerStatData.DashSpeed + addStatData.DashSpeed;
         playerStatData.DashDuration = _playerStatData.DashDuration + addStatData.DashDuration;
-        playerStatData.RequestDashStamina = playerStatData.RequestDashStamina;
+        playerStatData.RequestDashStamina = _playerStatData.RequestDashStamina;
 
         return new PlayerStatData(playerStatData);
     }

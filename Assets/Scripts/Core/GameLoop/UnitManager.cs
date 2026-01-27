@@ -14,7 +14,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
     [SerializeField] private int maxSpawnDelay;
     [SerializeField] private int maxSpawnCount;
     
-    private const int SPAWN_RATE_PER_ONCE = 2;
+    private const int SPAWN_RATE_PER_ONCE = 4;
     
     private Dictionary<int, Enemy> _enemiesDict;
     private Dictionary<int, EnemyStatData> _enemiesStatDict;
@@ -27,7 +27,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private UIManager _uiManager;
     
     private CancellationTokenSource _tokenSource;
-    
+
+    private bool _isSpawning = false;
     #region Init
     public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager, UIManager uiManager)
     {
@@ -51,10 +52,14 @@ public class UnitManager : MonoBehaviour, IUnitManager
     {
         while (_tokenSource is { IsCancellationRequested: false })
         {
-            await UniTask.Delay(spawnDelay, cancellationToken: _tokenSource.Token);
+            int randomSpawnDelay = Random.Range(spawnDelay, maxSpawnDelay);
+            await UniTask.Delay(randomSpawnDelay, cancellationToken: _tokenSource.Token);
             int spawnEnemyCount = _enemiesDict.Count >= maxSpawnCount ? 0 : (maxSpawnCount - _enemiesDict.Count) / SPAWN_RATE_PER_ONCE + (maxSpawnCount - _enemiesDict.Count) % SPAWN_RATE_PER_ONCE;
 
-            if (spawnEnemyCount <= 0) return;
+            if (spawnEnemyCount <= 0)
+            {
+                break;
+            }
 
             for (int index = 0; index < spawnEnemyCount; ++index)
             {
@@ -64,6 +69,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
                 RegisterEnemy(newEnemy);
             }
         }
+
+        _isSpawning = false;
     }
 
     private void RegisterEnemy(Enemy enemy)
@@ -87,6 +94,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
 
     public void StartSpawn()
     {
+        if (_isSpawning) return;
+        else _isSpawning = true;
         _tokenSource?.Cancel();
         _tokenSource?.Dispose();
         
@@ -126,6 +135,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _poolManager.ReturnEnemy(_enemiesDict[instanceID]);
         _enemiesDict.Remove(instanceID);
         _enemiesStatDict.Remove(instanceID);
+        StartSpawn();
     }
 
     #endregion
