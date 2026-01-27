@@ -21,21 +21,18 @@ public class Player : MonoBehaviour
     private Dash _dash;
     private Aim _aim;
     private Shoot _shoot;
-
-    private Action<int> _onDie;
     
     private bool _isDash = false;
     private bool _isStaminaRecovering = false;
     
     private CancellationTokenSource staminaRecoverTokenSource;
     #region Init
-    public void Init(IPlayerInput playerInput, PlayerStatData playerStatData, (BulletStatData, IAttack) weaponData, Action<int> onDie)
+    public void Init(IPlayerInput playerInput, PlayerStatData playerStatData, (BulletStatData, IAttack) weaponData)
     {
         _health = playerStatData.Health;
         _requestDashStamina = playerStatData.RequestDashStamina;
         _stamina = playerStatData.Stamina;
         _maxStamina = playerStatData.Stamina;
-        _onDie = onDie;
         
         _movement = new Movement(
             playerInput,
@@ -122,13 +119,14 @@ public class Player : MonoBehaviour
         _health -= damage;
         if (_health <= 0)
         {
+            
             OnDie();
             return;
         }
     }
     void OnDie()
     {
-        _onDie(this.GetInstanceID());
+        UnitManager.instance.OnUnitDie(UnitType.Player, gameObject.GetInstanceID());
     }
 
     #endregion

@@ -80,7 +80,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _enemiesDict[instanceID] = enemy;
         _enemiesStatDict[instanceID] = enemyStatData;
         _uiManager.SetHP(instanceID, enemy.GetHealthAnchor());
-        enemy.Init(enemyStatData, player.gameObject, OnUnitDie);
+        enemy.Init(enemyStatData, player.gameObject);
     }
     #endregion
 
@@ -88,7 +88,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
 
     public void SetPlayer()
     {
-        player.Init(_inputManager.GetPlayerInput(), _statManager.GetPlayerOriginStatData(), _statManager.GetBulletOriginData(), OnUnitDie);
+        player.Init(_inputManager.GetPlayerInput(), _statManager.GetPlayerOriginStatData(), _statManager.GetBulletOriginData());
         StartSpawn();
     }
 
@@ -103,29 +103,34 @@ public class UnitManager : MonoBehaviour, IUnitManager
         SpawnEnemies().Forget();
     }
 
+    public void GameOver()
+    {
+        _tokenSource?.Cancel();
+        _tokenSource?.Dispose();
+    }
+
     #endregion
 
     #region event
 
-    public void OnUnitHit(int instanceID)
+    public void OnUnitHit(UnitType unitType, int instanceID)
     {
-        Enemy enemyInfo =  _enemiesDict[instanceID];
-        if (player.gameObject.GetInstanceID() == instanceID)
+        if (unitType == UnitType.Player)
         {
-            player.OnHit(_enemiesStatDict[instanceID].Damage); //TODO this magic number is for test only!!! must replace to stat data
+            player.OnHit(_enemiesDict[instanceID].GetDamage());
             return;
         }
 
         if (!_enemiesDict.ContainsKey(instanceID)) 
             return;
-        
+        Enemy enemyInfo =  _enemiesDict[instanceID];
         enemyInfo.OnHit(_statManager.GetBulletTotalStatData().Damage); //TODO this magic number is for test only!!! must replace to stat data
         _uiManager.ChangeHP(enemyInfo.GetCurHP() / enemyInfo.GetTotalHP(), instanceID);
     }
-
-    void OnUnitDie(int instanceID)
+    
+    public void OnUnitDie(UnitType unitType, int instanceID)
     {
-        if (player.GetInstanceID() == instanceID)
+        if (unitType == UnitType.Player)
         {
             _gameManager.GameOver();
             return;

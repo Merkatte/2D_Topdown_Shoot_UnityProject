@@ -5,6 +5,9 @@ public struct EnemyStatData
     //Health Stat
     public readonly float Health;
     
+    //Fire rate
+    public readonly int FireRate;
+    
     //Damage
     public readonly float Damage;
     
@@ -15,10 +18,12 @@ public struct EnemyStatData
     public readonly float MoveSpeed;
     public readonly float Acceleration;
     public readonly float Deceleration;
+    
 
     public EnemyStatData(EnemyRepo enemyRepo)
     {
         Health = enemyRepo.Health;
+        FireRate = enemyRepo.FireRate;
         Damage = enemyRepo.Damage; 
         Armor = enemyRepo.Armor;
         MoveSpeed = enemyRepo.MoveSpeed;
@@ -29,6 +34,7 @@ public struct EnemyStatData
     public EnemyStatData(AddEnemyStatData addEnemyStatData)
     {
         Health = addEnemyStatData.AddHealth;
+        FireRate = addEnemyStatData.AddFireRate;
         Damage = addEnemyStatData.AddDamage;
         Armor = addEnemyStatData.AddArmor;
         MoveSpeed = addEnemyStatData.AddMoveSpeed;
@@ -42,6 +48,9 @@ public struct AddEnemyStatData
     //Health Stat
     public float AddHealth;
 
+    //Fire Rate
+    public int AddFireRate;
+    
     //Damage Stat
     public float AddDamage;
     
@@ -58,6 +67,7 @@ public struct AddEnemyStatData
     public void AddStat(in AddEnemyStatData stat)
     {
         AddHealth = stat.AddHealth;
+        AddFireRate = stat.AddFireRate;
         AddDamage = stat.AddDamage;
         AddArmor = stat.AddArmor;
         AddMoveSpeed = stat.AddMoveSpeed;

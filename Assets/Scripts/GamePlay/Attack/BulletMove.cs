@@ -54,7 +54,7 @@ public class BulletMove : MonoBehaviour
         {
             if (!_isHit) _isHit = true;
             else return;
-            UnitManager.instance.OnUnitHit(other.gameObject.GetInstanceID());
+            UnitManager.instance.OnUnitHit(UnitType.Enemy, other.gameObject.GetInstanceID());
             _poolManager.ReturnBullet(this);
         }
     }

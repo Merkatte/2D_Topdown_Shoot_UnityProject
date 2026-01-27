@@ -84,6 +84,8 @@ public class StatManager : MonoBehaviour
     {
         AddEnemyStatData enemyStatData = AddEnemyStatData.Zero;
         enemyStatData.AddHealth = _enemyStatData.Health + addStatData.AddHealth;
+        enemyStatData.AddDamage = _enemyStatData.Damage + addStatData.AddDamage;
+        enemyStatData.AddFireRate = _enemyStatData.FireRate + addStatData.AddFireRate;
         enemyStatData.AddArmor = _enemyStatData.Armor + addStatData.AddArmor;
         enemyStatData.AddMoveSpeed = _enemyStatData.MoveSpeed + addStatData.AddMoveSpeed;
         enemyStatData.AddAcceleration = _enemyStatData.Acceleration;

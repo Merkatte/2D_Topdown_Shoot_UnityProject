@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
@@ -6,14 +7,18 @@ public class UIManager : MonoBehaviour
     [Header("Canvas")]
     [SerializeField] private Canvas mainCanvas;
     [SerializeField] private Canvas popUpCanvas;
+    [SerializeField] private Canvas statCanvas;
     
     [Header("Background")]
     [SerializeField] private GameObject backGround;
     
     [Header("Popup")]
+    [SerializeField] private List<Popbase> popups;
+    
     
     private PoolManager _poolManager;
-    Dictionary<int, HPBar> enemyHPBars =  new Dictionary<int, HPBar>();
+    Dictionary<int, HPBar> _enemyHPBars =  new Dictionary<int, HPBar>();
+    List<Popbase> _activePops = new List<Popbase>();
 
     public void Init(PoolManager poolManager)
     {
@@ -22,24 +27,38 @@ public class UIManager : MonoBehaviour
 
     public void SetHP(int instanceID, GameObject targetObject)
     {
-        if (enemyHPBars == null) enemyHPBars = new Dictionary<int, HPBar>();
+        if (_enemyHPBars == null) _enemyHPBars = new Dictionary<int, HPBar>();
         HPBar hpBar = _poolManager.GetHPBar();
-        hpBar.transform.parent = mainCanvas.transform;
+        hpBar.transform.parent = statCanvas.transform;
         
         hpBar.Init(targetObject);
-        enemyHPBars.Add(instanceID, hpBar);
+        _enemyHPBars.Add(instanceID, hpBar);
     }
     
     public void ChangeHP(float val, int instanceID)
     {
-        if (!enemyHPBars.ContainsKey(instanceID)) return;
+        if (!_enemyHPBars.ContainsKey(instanceID)) return;
         
-        enemyHPBars[instanceID].SetHPSlider(val);
+        _enemyHPBars[instanceID].SetHPSlider(val);
     }
 
     public void ReleaseHP(int instanceID)
     {
-        _poolManager.ReturnHPBar(enemyHPBars[instanceID]);
-        enemyHPBars.Remove(instanceID);
+        _poolManager.ReturnHPBar(_enemyHPBars[instanceID]);
+        _enemyHPBars.Remove(instanceID);
+    }
+
+    public void OpenPopup(PopType popType)
+    {
+        backGround.SetActive(true);
+        _activePops.Add(popups[(int)popType]);
+        popups[(int)popType].OpenPop();
+    }
+
+    public void ClosePopup()
+    {
+        _activePops.Last().ClosePop();
+        _activePops.Remove(_activePops.Last());
+        if(_activePops.Count == 0) backGround.SetActive(false);
     }
 }

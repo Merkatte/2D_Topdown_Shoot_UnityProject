@@ -13,6 +13,7 @@ public class Shoot : IDisposable
     private WeaponRepo _weaponRepo;
     private GameObject _playerObject;
     private Aim _aim;
+    private Camera _camera;
     private int _fireRate
     {
         get { return firerate; }
@@ -27,7 +28,7 @@ public class Shoot : IDisposable
         _fireRate = bulletStatData.FireRate;
         
         _attack.Init(bulletStatData);
-        
+        _camera = Camera.main;
         CancellationTokenSource token = new CancellationTokenSource();
         _cancellationToken = token;
         ShootTerm(_cancellationToken.Token).Forget();
@@ -44,7 +45,7 @@ public class Shoot : IDisposable
         while (!token.IsCancellationRequested)
         {
             await UniTask.Delay(_fireRate, false, PlayerLoopTiming.Update, token);
-            Vector2 mousePos = Camera.main.ScreenToWorldPoint(_aim.GetAimPosition());
+            Vector2 mousePos = _camera.ScreenToWorldPoint(_aim.GetAimPosition());
             Vector2 playerPos =  _playerObject.transform.position;
             Vector2 normalizedPos = (mousePos - playerPos).normalized;
             _attack.OrderAttack(playerPos, normalizedPos);

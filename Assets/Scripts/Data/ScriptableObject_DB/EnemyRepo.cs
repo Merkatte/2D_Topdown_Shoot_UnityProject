@@ -4,6 +4,7 @@ using UnityEngine;
 public class EnemyRepo : ScriptableObject
 {
     public float Health;
+    public int FireRate;
     public float Damage;
     public float Armor;
     public float MoveSpeed;

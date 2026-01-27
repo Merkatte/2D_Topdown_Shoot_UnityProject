@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -48,16 +49,22 @@ public class GameManager : MonoBehaviour
     #endregion
     
     #region public
-
     public void GameOver()
     {
-        
+        unitManager.GameOver();
     }
 
     public void PlayerLevelUp()
     {
-        Time.timeScale = 0;
         
+    }
+    #endregion
+    
+    #region ButtonEvent
+
+    public void OnClickRetry()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
     #endregion
 }

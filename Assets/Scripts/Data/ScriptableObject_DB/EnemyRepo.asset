@@ -13,6 +13,8 @@ MonoBehaviour:
   m_Name: EnemyRepo
   m_EditorClassIdentifier: Assembly-CSharp::EnemyRepo
   Health: 100
+  FireRate: 2000
+  Damage: 10
   Armor: 10
   MoveSpeed: 2
   Acceleration: 0
