@@ -23,9 +23,6 @@ public class GameManager : MonoBehaviour
     #endregion
     
     #region private
-    //Can be Delayed
-    //If there`s something reason to change this method to async
-    //Please use Unitask and change the Init method.
     void InitiateManagers()
     {
         //Core Init
@@ -66,7 +63,11 @@ public class GameManager : MonoBehaviour
 
     public void PlayerLevelUp()
     {
+        Time.timeScale = 0;
+
+        var options = statManager.GetRandomUpgradeOptions(3);
         
+        uiManager.OpenPopup<LevelUpPop>(PopType.LevelUpPopup).Init(options, OnUpgradeSelected);
     }
     #endregion
     
@@ -81,6 +82,11 @@ public class GameManager : MonoBehaviour
     {
         weaponType = selectedWeapon;
         InitlateManager();
+    }
+
+    void OnUpgradeSelected(UpgradeOption selectedOption)
+    {
+        
     }
     #endregion
 }

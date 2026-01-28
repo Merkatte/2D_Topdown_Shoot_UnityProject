@@ -7,6 +7,7 @@ public class DataManager : MonoBehaviour
     [SerializeField] private WeaponRepo weaponRepo;
     [SerializeField] private EnemyRepo enemyRepo;
     [SerializeField] private LevelRepo levelRepo;
+    [SerializeField] private StatUpRepo statUpRepo;
     #region Init
 
     public void Init()
@@ -20,5 +21,6 @@ public class DataManager : MonoBehaviour
     public EnemyRepo GetEnemyRepo() => enemyRepo;
     public WeaponData GetSelectedWeaponData(WeaponType weaponType) => weaponRepo.GetWeaponData(weaponType);
     public LevelRepo GetLevelRepo() => levelRepo;
+    public StatUpRepo GetStatUpRepo() => statUpRepo;
     #endregion
 }

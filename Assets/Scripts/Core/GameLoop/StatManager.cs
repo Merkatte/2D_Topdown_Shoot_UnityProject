@@ -12,6 +12,7 @@ public class StatManager : MonoBehaviour
     
     private DataManager _dataManager;
     private IAttack _curWeapon;
+    private WeaponType _curWeaponType;
     private IPoolManager _poolManager;
     
     private AddPlayerStatData _addPlayerStatData;
@@ -40,6 +41,7 @@ public class StatManager : MonoBehaviour
     void SetWeaponData(WeaponType weaponType)
     {
         WeaponData weaponData = _dataManager.GetSelectedWeaponData(weaponType);
+        _curWeaponType = weaponType;
         _bulletStatData = new BulletStatData(weaponData.WeaponVal);
         _curWeapon = weaponData.Weapon;
     }
@@ -94,6 +96,69 @@ public class StatManager : MonoBehaviour
 
         return new EnemyStatData(enemyStatData);
     }
+    
+    #region StatUpOption
+
+    private UpgradeOption CreatePlayerOption(PlayerStatUpData data)
+    {
+        CalculateType randomCalType = (CalculateType)UnityEngine.Random.Range(0, data.CalculateType.Count);
+
+        float randomVal = 0;
+        if (randomCalType == CalculateType.Percentage)
+            randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPercentVal, data.MaxPercentVal));
+        else
+            randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal));
+
+        return new UpgradeOption(
+            UpgradeCategory.Player,
+            (int)data.StatType,
+            data.DisplayName,
+            randomVal,
+            randomCalType
+        );
+    }
+
+    private UpgradeOption CreateWeaponOption(WeaponStatUpData data)
+    {
+        CalculateType randomCalType = (CalculateType)UnityEngine.Random.Range(0, data.CalculateType.Count);
+        
+        float randomVal = 0;
+        if (randomCalType == CalculateType.Percentage)
+            randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPercentVal, data.MaxPercentVal));
+        else
+            randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal));
+
+        return new UpgradeOption(
+            UpgradeCategory.Weapon,
+            (int)data.StatType,
+            data.DisplayName,
+            randomVal,
+            randomCalType
+        );
+    }
+    
+    private List<UpgradeOption> SelectRandomOptions(List<UpgradeOption> source, int count)
+    {
+        if (source.Count == 0)
+            return new List<UpgradeOption>();
+        
+        if (count >= source.Count)
+            return new List<UpgradeOption>(source);
+        
+        List<UpgradeOption> shuffled = new List<UpgradeOption>(source);
+        
+        for (int i = shuffled.Count - 1; i > 0; i--)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, i + 1);
+            
+            UpgradeOption temp = shuffled[i];
+            shuffled[i] = shuffled[randomIndex];
+            shuffled[randomIndex] = temp;
+        }
+        
+        return shuffled.GetRange(0, count);
+    }
+    #endregion
     #endregion
     
     #region public
@@ -135,6 +200,27 @@ public class StatManager : MonoBehaviour
     {
         //TODO : Should Add Stat Change Logic
         return _bulletStatData;
+    }
+
+    public List<UpgradeOption> GetRandomUpgradeOptions(int count = 3)
+    {
+        StatUpRepo statUpRepo = _dataManager.GetStatUpRepo();
+        List<UpgradeOption> allOptions = new List<UpgradeOption>();
+        
+        foreach (var data in statUpRepo.PlayerStatUpData)
+        {
+            allOptions.Add(CreatePlayerOption(data));
+        }
+        
+        foreach (var data in statUpRepo.WeaponStatUpData)
+        {
+            if (data.ApplicableWeapons.Contains(_curWeaponType))
+            {
+                allOptions.Add(CreateWeaponOption(data));
+            }
+        }
+        
+        return SelectRandomOptions(allOptions, count);
     }
     #endregion
 

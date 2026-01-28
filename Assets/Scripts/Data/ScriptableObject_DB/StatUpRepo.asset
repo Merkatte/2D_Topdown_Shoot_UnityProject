@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e747538cfc9d9f94d8e8e1e4c6085130, type: 3}
+  m_Name: StatUpRepo
+  m_EditorClassIdentifier: Assembly-CSharp::StatUpRepo
+  PlayerStatUpData:
+  - StatType: 0
+    CalculateType: 0100000000000000
+    MinPlusVal: 0
+    MaxPlusVal: 0
+    MinPercentVal: 0
+    MaxPercentVal: 0
+    DisplayName: Health
+  - StatType: 1
+    CalculateType: 01000000
+    MinPlusVal: 0.2
+    MaxPlusVal: 0.5
+    MinPercentVal: 0
+    MaxPercentVal: 0
+    DisplayName: Speed
+  WeaponStatUpData:
+  - StatType: 0
+    ApplicableWeapons: 000000000100000002000000
+    CalculateType: 0100000000000000
+    MinPlusVal: 10
+    MaxPlusVal: 20
+    MinPercentVal: 5
+    MaxPercentVal: 10
+    DisplayName: Damage
+  - StatType: 1
+    ApplicableWeapons: 000000000100000002000000
+    CalculateType: 00000000
+    MinPlusVal: 0
+    MaxPlusVal: 0
+    MinPercentVal: 5
+    MaxPercentVal: 10
+    DisplayName: Firerate
+  - StatType: 2
+    ApplicableWeapons: 01000000
+    CalculateType: 01000000
+    MinPlusVal: 1
+    MaxPlusVal: 2
+    MinPercentVal: 0
+    MaxPercentVal: 0
+    DisplayName: Bullet

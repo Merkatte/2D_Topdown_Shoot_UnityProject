@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum StatType
+public enum UpgradeCategory
 {
     Player,
     Weapon
@@ -9,17 +9,12 @@ public enum StatType
 public enum PlayerStatType
 {
     Health,
-    Stamina,
-    Armor,
     MoveSpeed
 }
 
 public enum WeaponStatType
 {
     Damage,
-    BulletSpeed,
-    KnockBack,
-    Distance,
     FireRate,
     BulletNum
 }
