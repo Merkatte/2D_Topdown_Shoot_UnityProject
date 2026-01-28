@@ -1,5 +1,7 @@
+using System;
 using UnityEngine;
-using UnityEngine.Pool; 
+using UnityEngine.Pool;
+using Object = UnityEngine.Object;
 
 public class PoolManager : MonoBehaviour, IPoolManager
 {
@@ -50,6 +52,15 @@ public class PoolManager : MonoBehaviour, IPoolManager
     public void ReturnHPBar(HPBar obj) => _hpBarPool.Release(obj);
 
     #endregion
+
+    #endregion
+    
+    #region event
+
+    private void OnDestroy()
+    {
+        instance = null;
+    }
 
     #endregion
 }

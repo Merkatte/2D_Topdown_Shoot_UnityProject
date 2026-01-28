@@ -6,6 +6,7 @@ public class Shotgun : AttackBase
     private float randomSpeedRate = 60f;
     protected override void Attack(Vector2 startPosition, Vector2 direction)
     {
+        Debug.Log("Call" + curStatData.BulletNum_PerShot);
         for (int index = 0; index < curStatData.BulletNum_PerShot; index++)
         {
             BulletMove newBullet = _poolManager.GetBulletMove();

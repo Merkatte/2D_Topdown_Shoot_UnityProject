@@ -48,17 +48,31 @@ public class UIManager : MonoBehaviour
         _enemyHPBars.Remove(instanceID);
     }
 
-    public void OpenPopup(PopType popType)
+    public T OpenPopup<T>(PopType popType) where T : Popbase
     {
+        Debug.Log(popType);
         backGround.SetActive(true);
         _activePops.Add(popups[(int)popType]);
-        popups[(int)popType].OpenPop();
+        popups[(int)popType].OpenPop(ClosePopup);
+
+        return popups[(int)popType] as T;
     }
 
     public void ClosePopup()
-    {
-        _activePops.Last().ClosePop();
+    {   
+        _activePops.Last().gameObject.SetActive(false);
         _activePops.Remove(_activePops.Last());
+
         if(_activePops.Count == 0) backGround.SetActive(false);
+    }
+
+    public void CloseAllPopups()
+    {
+        foreach (var popup in _activePops)
+        {
+            popup.gameObject.SetActive(false);
+        }
+        _activePops.Clear();
+        backGround.SetActive(false);
     }
 }

@@ -6,6 +6,7 @@ public class PlayerRepo : ScriptableObject
     [Header("Health Stat")]
     public float Health;
     public float Stamina;
+    public float StaminaRecovery;
 
     [Header("Armor Stat")]
     public float Armor;

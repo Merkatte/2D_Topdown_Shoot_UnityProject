@@ -56,6 +56,7 @@ public class StatManager : MonoBehaviour
         AddPlayerStatData playerStatData = AddPlayerStatData.Zero;
         playerStatData.Health = _playerStatData.Health + addStatData.Health;
         playerStatData.Stamina = _playerStatData.Stamina + addStatData.Stamina;
+        playerStatData.StaminaRecovery =  _playerStatData.StaminaRecovery + addStatData.StaminaRecovery;
         playerStatData.Armor = _playerStatData.Armor + addStatData.Armor;
         playerStatData.MoveSpeed = _playerStatData.MoveSpeed + addStatData.MoveSpeed;
         playerStatData.Acceleration = _playerStatData.Acceleration + addStatData.Acceleration;

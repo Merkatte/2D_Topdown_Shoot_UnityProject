@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Game.Utils;
+using Random = UnityEngine.Random;
+
 public class UnitManager : MonoBehaviour, IUnitManager
 {
     public static IUnitManager instance; 
@@ -18,7 +21,6 @@ public class UnitManager : MonoBehaviour, IUnitManager
     
     private Dictionary<int, Enemy> _enemiesDict;
     private Dictionary<int, EnemyStatData> _enemiesStatDict;
-    private float _playerHP;
 
     private GameManager _gameManager;
     private InputManager _inputManager;
@@ -29,6 +31,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private CancellationTokenSource _tokenSource;
 
     private bool _isSpawning = false;
+    private bool _isGameOver = false;
     #region Init
     public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager, UIManager uiManager)
     {
@@ -82,17 +85,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _uiManager.SetHP(instanceID, enemy.GetHealthAnchor());
         enemy.Init(enemyStatData, player.gameObject);
     }
-    #endregion
-
-    #region public
-
-    public void SetPlayer()
-    {
-        player.Init(_inputManager.GetPlayerInput(), _statManager.GetPlayerOriginStatData(), _statManager.GetBulletOriginData());
-        StartSpawn();
-    }
-
-    public void StartSpawn()
+    
+    private void StartSpawn()
     {
         if (_isSpawning) return;
         else _isSpawning = true;
@@ -101,6 +95,15 @@ public class UnitManager : MonoBehaviour, IUnitManager
         
         _tokenSource = new CancellationTokenSource();
         SpawnEnemies().Forget();
+    }
+    #endregion
+
+    #region public
+
+    public void SetPlayer()
+    {
+        player.Init(_inputManager.GetPlayerInput(), _statManager.GetPlayerOriginStatData(), _statManager.GetBulletOriginData());
+        StartSpawn();
     }
 
     public void GameOver()
@@ -130,8 +133,10 @@ public class UnitManager : MonoBehaviour, IUnitManager
     
     public void OnUnitDie(UnitType unitType, int instanceID)
     {
+        if (_isGameOver) return;
         if (unitType == UnitType.Player)
         {
+            _isGameOver = true;
             _gameManager.GameOver();
             return;
         }
@@ -141,6 +146,11 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _enemiesDict.Remove(instanceID);
         _enemiesStatDict.Remove(instanceID);
         StartSpawn();
+    }
+
+    private void OnDestroy()
+    {
+        instance = null;
     }
 
     #endregion

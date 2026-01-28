@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: MachineGun
   m_EditorClassIdentifier: Assembly-CSharp::BulletConfig
   Damage: 10
-  Speed: 30
+  BulletSpeed: 30
   KnockBack: 1
   BulletDistance: 20
-  FireRate: 500
+  FireRate: 200
   BulletNum_PerShot: 1

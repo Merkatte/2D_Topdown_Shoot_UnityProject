@@ -1,8 +1,8 @@
 public enum WeaponType
 {
     Pistol,
-    MachineGun,
-    ShotGun
+    ShotGun,
+    MachineGun
 }
 
 public enum BulletUpEnum

@@ -9,12 +9,15 @@ public class Player : MonoBehaviour
     [SerializeField] private Rigidbody2D _rigidbody2D;
     [SerializeField] private SpriteRenderer _spriteRenderer;
 
+    private const int STAMINA_RECOVER_TIME = 1000;
+    
     private float _health;
     private float _maxHealth;
     
     private float _stamina;
     private float _requestDashStamina;
     private float _maxStamina;
+    private float _staminaRecoverVal;
     
     //Action Components
     private Movement _movement;
@@ -25,7 +28,7 @@ public class Player : MonoBehaviour
     private bool _isDash = false;
     private bool _isStaminaRecovering = false;
     
-    private CancellationTokenSource staminaRecoverTokenSource;
+    private CancellationTokenSource _staminaRecoverTokenSource;
     #region Init
     public void Init(IPlayerInput playerInput, PlayerStatData playerStatData, (BulletStatData, IAttack) weaponData)
     {
@@ -33,6 +36,7 @@ public class Player : MonoBehaviour
         _requestDashStamina = playerStatData.RequestDashStamina;
         _stamina = playerStatData.Stamina;
         _maxStamina = playerStatData.Stamina;
+        _staminaRecoverVal = playerStatData.StaminaRecovery;
         
         _movement = new Movement(
             playerInput,
@@ -64,9 +68,9 @@ public class Player : MonoBehaviour
         if (!_isStaminaRecovering)
         {
             _isStaminaRecovering = true;
-            staminaRecoverTokenSource?.Cancel();
-            staminaRecoverTokenSource?.Dispose();
-            staminaRecoverTokenSource = new CancellationTokenSource();
+            _staminaRecoverTokenSource?.Cancel();
+            _staminaRecoverTokenSource?.Dispose();
+            _staminaRecoverTokenSource = new CancellationTokenSource();
 
             RecoverStamina().Forget();
         } 
@@ -82,8 +86,8 @@ public class Player : MonoBehaviour
     {
         while (_stamina < _maxStamina)
         {
-            await UniTask.Delay(1000, cancellationToken: staminaRecoverTokenSource.Token);
-            _stamina += 5;
+            await UniTask.Delay(STAMINA_RECOVER_TIME, cancellationToken: _staminaRecoverTokenSource.Token);
+            _stamina += _staminaRecoverVal;
         }
         _stamina = _maxStamina;
         _isStaminaRecovering = false;
@@ -126,6 +130,13 @@ public class Player : MonoBehaviour
     }
     void OnDie()
     {
+        if (_staminaRecoverTokenSource is { IsCancellationRequested: false })
+        {
+            _staminaRecoverTokenSource?.Cancel();
+            _staminaRecoverTokenSource?.Dispose();
+        }
+
+        _shoot.Dispose();
         UnitManager.instance.OnUnitDie(UnitType.Player, gameObject.GetInstanceID());
     }
 

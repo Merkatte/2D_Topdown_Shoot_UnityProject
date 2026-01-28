@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,8 +19,6 @@ public class GameManager : MonoBehaviour
     public void Init()
     {
         InitiateManagers();
-
-        StartGame();
     }
     #endregion
     
@@ -33,13 +32,23 @@ public class GameManager : MonoBehaviour
         dataManager.Init();
         poolManager.Init();
         inputManager.Init();
+        uiManager.Init(poolManager);
         
+        SelectWeapon();
+    }
+
+    void InitlateManager()
+    {
         //GameData Init
         statManager.Init(dataManager, poolManager, weaponType);
         unitManager.Init(this, inputManager, statManager, poolManager, uiManager);
-        
-        //UI Init
-        uiManager.Init(poolManager);
+
+        StartGame();
+    }
+
+    void SelectWeapon()
+    {
+        uiManager.OpenPopup<WeaponSelectPop>(PopType.WeaponSelectPopup).Init(OnSelectWeapon);
     }
 
     void StartGame()
@@ -51,6 +60,7 @@ public class GameManager : MonoBehaviour
     #region public
     public void GameOver()
     {
+        uiManager.OpenPopup<GameOverPop>(PopType.GameOverPopup).Init(OnClickRetry);
         unitManager.GameOver();
     }
 
@@ -62,9 +72,15 @@ public class GameManager : MonoBehaviour
     
     #region ButtonEvent
 
-    public void OnClickRetry()
+    void OnClickRetry()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    void OnSelectWeapon(WeaponType selectedWeapon)
+    {
+        weaponType = selectedWeapon;
+        InitlateManager();
     }
     #endregion
 }

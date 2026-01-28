@@ -1,14 +1,17 @@
 using UnityEngine;
-
+using System;
 public class Popbase : MonoBehaviour
 {
-    public virtual void OpenPop()
+    private Action _closeCallback;
+    public virtual void OpenPop(Action closeCallback)
     {
+        _closeCallback = closeCallback;
         gameObject.SetActive(true);
     }
 
     public virtual void ClosePop()
     {
-        
+        _closeCallback?.Invoke();
+        _closeCallback = null;
     }
 }

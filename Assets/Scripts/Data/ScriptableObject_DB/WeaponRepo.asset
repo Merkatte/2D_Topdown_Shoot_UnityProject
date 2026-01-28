@@ -16,6 +16,6 @@ MonoBehaviour:
   - WeaponType: 0
     WeaponVal: {fileID: 11400000, guid: 96bb8cc1fe4775943ad2b58695a79311, type: 2}
   - WeaponType: 1
-    WeaponVal: {fileID: 11400000, guid: 33a01e202425f12438642ee37b98f021, type: 2}
-  - WeaponType: 2
     WeaponVal: {fileID: 11400000, guid: 89c455943be56674180eafe34b8d5ebe, type: 2}
+  - WeaponType: 2
+    WeaponVal: {fileID: 11400000, guid: 33a01e202425f12438642ee37b98f021, type: 2}

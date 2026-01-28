@@ -5,7 +5,8 @@ public struct PlayerStatData
     //Health Stat
     public readonly float Health;
     public readonly float Stamina;
-
+    public readonly float StaminaRecovery;
+    
     //Armor Stat
     public readonly float Armor;
     
@@ -24,6 +25,7 @@ public struct PlayerStatData
     {
         Health = playerRepo.Health;
         Stamina = playerRepo.Stamina;
+        StaminaRecovery = playerRepo.StaminaRecovery;
         Armor = playerRepo.Armor;
         MoveSpeed = playerRepo.MoveSpeed;
         Acceleration = playerRepo.Acceleration;
@@ -37,6 +39,7 @@ public struct PlayerStatData
     {
         Health = addPlayerStatData.Health;
         Stamina = addPlayerStatData.Stamina;
+        StaminaRecovery = addPlayerStatData.StaminaRecovery;
         Armor = addPlayerStatData.Armor;
         MoveSpeed = addPlayerStatData.MoveSpeed;
         Acceleration = addPlayerStatData.Acceleration;
@@ -52,7 +55,8 @@ public struct AddPlayerStatData
     //Health Stat
     public float Health;
     public float Stamina;
-
+    public float StaminaRecovery;
+    
     //Armor Stat
     public float Armor;
     
@@ -72,6 +76,7 @@ public struct AddPlayerStatData
     {
         Health += stat.Health;
         Stamina += stat.Stamina;
+        StaminaRecovery += stat.StaminaRecovery;
         Armor += stat.Armor;
         MoveSpeed += stat.MoveSpeed;
         Acceleration += stat.Acceleration;

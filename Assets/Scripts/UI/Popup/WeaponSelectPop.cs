@@ -1,14 +1,19 @@
+using System;
 using UnityEngine;
 
 public class WeaponSelectPop : Popbase
 {
-    public override void OpenPop()
+    private Action<WeaponType> _onSelectCallback;
+    public void Init(Action<WeaponType> callback) => _onSelectCallback = callback;
+    public void OnClickWeaponButton(int weaponType)
     {
-        base.OpenPop();
+        _onSelectCallback?.Invoke((WeaponType)weaponType);
+        ClosePop();
     }
 
     public override void ClosePop()
     {
+        _onSelectCallback = null;
         base.ClosePop();
     }
 }
