@@ -16,14 +16,17 @@ public class UserHPBar : MonoBehaviour
 
     }
 
-    public void SetHPSlider(float hp)
+    public void SetHPSlider(float curHp, float maxHp)
     {
-        hpSlider.value = hp;
+        Debug.Log($"SetHPSlider {curHp}, {maxHp}");
+        var value = curHp >= maxHp ? 1 : curHp / maxHp;
+        hpSlider.value = value;
     }
 
-    public void setStaminaSlider(float stamina)
+    public void setStaminaSlider(float curStamina, float maxStamina)
     {
-        staminaSlider.value = stamina;
+        var value = curStamina >= maxStamina ? 1 : curStamina / maxStamina;
+        staminaSlider.value = value;
     }
 
     private void OnDisable()

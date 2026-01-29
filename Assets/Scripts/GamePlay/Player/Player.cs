@@ -9,12 +9,34 @@ public class Player : MonoBehaviour
     [SerializeField] private Rigidbody2D _rigidbody2D;
     [SerializeField] private SpriteRenderer _spriteRenderer;
 
+    public event Action<float, float> OnHealthChanged;
+    public event Action<float, float> OnStaminaChanged;
+
     private const int STAMINA_RECOVER_TIME = 1000;
-    
+
     private float _health;
-    private float _maxHealth;
-    
     private float _stamina;
+
+    private float Health
+    {
+        get { return _health; }
+        set
+        {
+            _health = value;
+            OnHealthChanged?.Invoke(_health, _maxHealth);
+        }
+    }
+    private float _maxHealth;
+
+    private float Stamina
+    {
+        get { return _stamina; }
+        set
+        {
+            _stamina = value;
+            OnStaminaChanged?.Invoke(value, _maxStamina);
+        }
+    }
     private float _requestDashStamina;
     private float _maxStamina;
     private float _staminaRecoverVal;
@@ -32,9 +54,10 @@ public class Player : MonoBehaviour
     #region Init
     public void Init(IPlayerInput playerInput, PlayerStatData playerStatData, (BulletStatData, IAttack) weaponData)
     {
-        _health = playerStatData.Health;
+        Health = playerStatData.Health;
+        _maxHealth = playerStatData.Health;
         _requestDashStamina = playerStatData.RequestDashStamina;
-        _stamina = playerStatData.Stamina;
+        Stamina = playerStatData.Stamina;
         _maxStamina = playerStatData.Stamina;
         _staminaRecoverVal = playerStatData.StaminaRecovery;
         
@@ -62,7 +85,7 @@ public class Player : MonoBehaviour
 
     private void UseStamina()
     {
-        _stamina -= _requestDashStamina;
+        Stamina -= _requestDashStamina;
 
         if (!_isStaminaRecovering)
         {
@@ -77,18 +100,18 @@ public class Player : MonoBehaviour
 
     private bool CheckStamina()
     {
-        if (_stamina < _requestDashStamina)
+        if (Stamina < _requestDashStamina)
             return false;
         return true;
     }
     private async UniTask RecoverStamina()
     {
-        while (_stamina < _maxStamina)
+        while (Stamina < _maxStamina)
         {
             await UniTask.Delay(STAMINA_RECOVER_TIME, cancellationToken: _staminaRecoverTokenSource.Token);
-            _stamina += _staminaRecoverVal;
+            Stamina += _staminaRecoverVal;
         }
-        _stamina = _maxStamina;
+        Stamina = _maxStamina;
         _isStaminaRecovering = false;
     }
     private void FixedUpdate() {
@@ -103,14 +126,14 @@ public class Player : MonoBehaviour
 
     public void PlayerLevelUp(PlayerStatData playerStatData)
     {
-        _health = playerStatData.Health;
+        Health = playerStatData.Health;
+        _maxHealth = playerStatData.Health;
         _requestDashStamina = playerStatData.RequestDashStamina;
-        _stamina = playerStatData.Stamina;
+        Stamina = playerStatData.Stamina;
         _maxStamina = playerStatData.Stamina;
         _staminaRecoverVal = playerStatData.StaminaRecovery;
         _movement.UpdateStates(playerStatData);
         _dash.UpdateStates(playerStatData);
-        
     }
 
     public void WeaponLevelUp(BulletStatData weaponStatData)
@@ -135,12 +158,10 @@ public class Player : MonoBehaviour
     }
     public void OnHit(float damage)
     {
-        _health -= damage;
-        if (_health <= 0)
+        Health -= damage;
+        if (Health <= 0)
         {
-            
             OnDie();
-            return;
         }
     }
     void OnDie()

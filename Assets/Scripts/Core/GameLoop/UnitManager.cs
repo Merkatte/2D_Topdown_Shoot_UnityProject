@@ -114,6 +114,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
     public void SetPlayer()
     {
         player.Init(_inputManager.GetPlayerInput(), _statManager.GetPlayerOriginStatData(), _statManager.GetBulletOriginData());
+        _uiManager.ConnectToPlayer(player);
         StartSpawn();
     }
 

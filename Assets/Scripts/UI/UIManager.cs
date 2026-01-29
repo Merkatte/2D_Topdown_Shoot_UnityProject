@@ -15,6 +15,9 @@ public class UIManager : MonoBehaviour
     [Header("Popup")]
     [SerializeField] private List<Popbase> popups;
     
+    [Header("Basic UI")]
+    [SerializeField] private UserHPBar userHPBar;
+    
     
     private PoolManager _poolManager;
     Dictionary<int, HPBar> _enemyHPBars =  new Dictionary<int, HPBar>();
@@ -74,5 +77,12 @@ public class UIManager : MonoBehaviour
         }
         _activePops.Clear();
         backGround.SetActive(false);
+    }
+
+    public void ConnectToPlayer(Player player)
+    {
+        player.OnHealthChanged += userHPBar.SetHPSlider;
+        player.OnStaminaChanged += userHPBar.setStaminaSlider;
+        userHPBar.gameObject.SetActive(true);
     }
 }
