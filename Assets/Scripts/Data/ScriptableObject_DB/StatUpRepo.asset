@@ -15,10 +15,10 @@ MonoBehaviour:
   PlayerStatUpData:
   - StatType: 0
     CalculateType: 0100000000000000
-    MinPlusVal: 0
-    MaxPlusVal: 0
-    MinPercentVal: 0
-    MaxPercentVal: 0
+    MinPlusVal: 10
+    MaxPlusVal: 30
+    MinPercentVal: 10
+    MaxPercentVal: 20
     DisplayName: Health
   - StatType: 1
     CalculateType: 01000000
@@ -31,10 +31,10 @@ MonoBehaviour:
   - StatType: 0
     ApplicableWeapons: 000000000100000002000000
     CalculateType: 0100000000000000
-    MinPlusVal: 10
-    MaxPlusVal: 20
-    MinPercentVal: 5
-    MaxPercentVal: 10
+    MinPlusVal: 30
+    MaxPlusVal: 50
+    MinPercentVal: 20
+    MaxPercentVal: 40
     DisplayName: Damage
   - StatType: 1
     ApplicableWeapons: 000000000100000002000000

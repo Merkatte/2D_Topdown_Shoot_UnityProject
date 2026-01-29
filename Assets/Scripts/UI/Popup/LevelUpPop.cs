@@ -16,7 +16,7 @@ public class LevelUpPop : Popbase
         _callback = onClick;
         for (int index = 0; index < _options.Count; index++)
         {
-            _optionTexts[index].text = options[index].DisplayName;
+            _optionTexts[index].text = options[index].GetDisplayText();
         }
     }
 

@@ -5,12 +5,14 @@ public class Movement : IDisposable
 {
     private readonly IPlayerInput _playerInput;
     private readonly Rigidbody2D _rigidbody2D;
-    private readonly float _moveSpeed;
-    private readonly float _acceleration;
-    private readonly float _deacceleration;
+    private float _moveSpeed;
+    private float _acceleration;
+    private float _deacceleration;
 
     private Vector2 _currentVelocity;
     private Vector2 _targetVelocity;
+
+    private Action<float> _onLevelUp;
 
     #region Init
     public Movement(
@@ -66,11 +68,27 @@ public class Movement : IDisposable
     
     #region Public
 
+    public void UpdateStates(PlayerStatData playerStatData)
+    {
+        _moveSpeed = playerStatData.MoveSpeed;
+        _acceleration = playerStatData.Acceleration;
+        _deacceleration = playerStatData.Deceleration;
+    }
+    
     public void FixedUpdate()
     {
         Move();
     }
     
+    #endregion
+    
+    #region event
+
+    void LevelUp(float movespeed)
+    {
+        _moveSpeed = movespeed;
+    }
+
     #endregion
     
     #region Dispose

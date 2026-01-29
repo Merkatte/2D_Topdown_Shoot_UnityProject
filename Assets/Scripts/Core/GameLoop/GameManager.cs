@@ -1,7 +1,6 @@
-using Cysharp.Threading.Tasks.Triggers;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-
+using System.Collections.Generic;
 public class GameManager : MonoBehaviour
 {
     [Header("Managers")]
@@ -15,6 +14,10 @@ public class GameManager : MonoBehaviour
     [Header("WeaponType")] 
     [SerializeField] private WeaponType weaponType;
     
+    List<LevelData> _levelData;
+
+    private int _playerKillCount;
+    private int _playerLevel = 0;
     #region Init
     public void Init()
     {
@@ -40,9 +43,24 @@ public class GameManager : MonoBehaviour
         statManager.Init(dataManager, poolManager, weaponType);
         unitManager.Init(this, inputManager, statManager, poolManager, uiManager);
 
+        RefineData();
+        
         StartGame();
     }
 
+    void RefineData()
+    {
+        _levelData = new List<LevelData>();
+        List<LevelConfig> levelConfigs = dataManager.GetLevelRepo().Levels;
+
+        for (int index = 0; index < levelConfigs.Count; index++)
+        {
+            LevelData newLevelData = new LevelData(
+                levelConfigs[index].level, levelConfigs[index].requireKillCount);
+            _levelData.Add(newLevelData);
+        }
+    }
+    
     void SelectWeapon()
     {
         uiManager.OpenPopup<WeaponSelectPop>(PopType.WeaponSelectPopup).Init(OnSelectWeapon);
@@ -51,6 +69,15 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         unitManager.SetPlayer();
+    }
+    
+    void PlayerLevelUp()
+    {
+        Time.timeScale = 0;
+        ++_playerLevel;
+        var options = statManager.GetRandomUpgradeOptions(3);
+        
+        uiManager.OpenPopup<LevelUpPop>(PopType.LevelUpPopup).Init(options, OnUpgradeSelected);
     }
     #endregion
     
@@ -61,13 +88,13 @@ public class GameManager : MonoBehaviour
         unitManager.GameOver();
     }
 
-    public void PlayerLevelUp()
+    public void CheckLevelUp()
     {
-        Time.timeScale = 0;
-
-        var options = statManager.GetRandomUpgradeOptions(3);
+        _playerKillCount++;
+        if (_playerLevel >= _levelData.Count) return;
         
-        uiManager.OpenPopup<LevelUpPop>(PopType.LevelUpPopup).Init(options, OnUpgradeSelected);
+        if(_levelData[_playerLevel].requireKillCount <= _playerKillCount)
+            PlayerLevelUp();
     }
     #endregion
     
@@ -86,7 +113,12 @@ public class GameManager : MonoBehaviour
 
     void OnUpgradeSelected(UpgradeOption selectedOption)
     {
+        if(selectedOption.Category == UpgradeCategory.Player)
+            statManager.UpgradePlayer(selectedOption);
+        else statManager.UpgradeWeapon(selectedOption);
         
+        unitManager.LevelUp(selectedOption.Category);
+        Time.timeScale = 1;
     }
     #endregion
 }

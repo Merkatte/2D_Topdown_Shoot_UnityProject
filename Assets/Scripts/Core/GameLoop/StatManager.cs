@@ -11,9 +11,9 @@ public class StatManager : MonoBehaviour
     private BulletStatData _bulletStatData;
     
     private DataManager _dataManager;
+    private IPoolManager _poolManager;
     private IAttack _curWeapon;
     private WeaponType _curWeaponType;
-    private IPoolManager _poolManager;
     
     private AddPlayerStatData _addPlayerStatData;
     private AddEnemyStatData _addEnemyStatData;
@@ -101,13 +101,19 @@ public class StatManager : MonoBehaviour
 
     private UpgradeOption CreatePlayerOption(PlayerStatUpData data)
     {
-        CalculateType randomCalType = (CalculateType)UnityEngine.Random.Range(0, data.CalculateType.Count);
-
+        CalculateType randomCalType = data.CalculateType[
+            UnityEngine.Random.Range(0, data.CalculateType.Count)
+        ];
+        if (data.StatType == PlayerStatType.MoveSpeed)
+        {
+            Debug.Log(data.MinPlusVal);
+            Debug.Log(data.MaxPlusVal);
+        }
         float randomVal = 0;
         if (randomCalType == CalculateType.Percentage)
             randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPercentVal, data.MaxPercentVal));
         else
-            randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal));
+            randomVal = UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal);
 
         return new UpgradeOption(
             UpgradeCategory.Player,
@@ -120,13 +126,15 @@ public class StatManager : MonoBehaviour
 
     private UpgradeOption CreateWeaponOption(WeaponStatUpData data)
     {
-        CalculateType randomCalType = (CalculateType)UnityEngine.Random.Range(0, data.CalculateType.Count);
+        CalculateType randomCalType = data.CalculateType[
+            UnityEngine.Random.Range(0, data.CalculateType.Count)
+        ];
         
         float randomVal = 0;
         if (randomCalType == CalculateType.Percentage)
             randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPercentVal, data.MaxPercentVal));
         else
-            randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal));
+            randomVal = UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal);
 
         return new UpgradeOption(
             UpgradeCategory.Weapon,
@@ -157,6 +165,19 @@ public class StatManager : MonoBehaviour
         }
         
         return shuffled.GetRange(0, count);
+    }
+    
+    private float CalculateIncreaseAmount(float value, CalculateType calculateType, float baseStat)
+    {
+        switch (calculateType)
+        {
+            case CalculateType.Plus:
+                return value;
+            case CalculateType.Percentage:
+                return baseStat * value / 100;
+        }
+
+        return value;
     }
     #endregion
     #endregion
@@ -221,6 +242,51 @@ public class StatManager : MonoBehaviour
         }
         
         return SelectRandomOptions(allOptions, count);
+    }
+
+    public void UpgradeWeapon(UpgradeOption upgradeOption)
+    {
+        WeaponStatType statType = (WeaponStatType)upgradeOption.StatType;
+        float baseStat = 0;
+        float result = 0;
+        switch (statType)
+        {
+            case WeaponStatType.Damage:
+                baseStat = _bulletStatData.Damage;
+                result = CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
+                _addBulletStatData.AddDamage += result;
+                break;
+            case WeaponStatType.BulletNum:
+                baseStat = _bulletStatData.BulletNum_PerShot;
+                result = CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
+                _addBulletStatData.AddBulletNum_PerShot += (int)result;
+                break;
+            case WeaponStatType.FireRate:
+                baseStat = _bulletStatData.FireRate;
+                result = CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
+                _addBulletStatData.AddFireRate -= (int)result;
+                break;
+        }
+    }
+
+    public void UpgradePlayer(UpgradeOption upgradeOption)
+    {
+        PlayerStatType statType = (PlayerStatType)upgradeOption.StatType;
+        float baseStat = 0;
+        float result = 0;
+        switch (statType)
+        {
+            case PlayerStatType.Health:
+                baseStat = _playerStatData.Health;
+                result =  CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
+                _addPlayerStatData.Health += result;
+                break;
+            case PlayerStatType.MoveSpeed:
+                baseStat = _playerStatData.MoveSpeed;
+                result =  CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
+                _addPlayerStatData.MoveSpeed += result;
+                break;
+        }
     }
     #endregion
 

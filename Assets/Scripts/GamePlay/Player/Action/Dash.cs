@@ -4,7 +4,6 @@ using UnityEngine;
 public class Dash : IDisposable {
     private readonly IPlayerInput _playerInput;
     private readonly Rigidbody2D _rigidbody2D;
-    private readonly float _dashSpeed;
 
     private readonly Action _onStartDash;
     private readonly Action _onEndDash;
@@ -15,6 +14,7 @@ public class Dash : IDisposable {
     private Vector2 _currentVelocity;
     private Vector2 _targetDirection;
 
+    private float _dashSpeed;
     private float _dashDuration;
     private float _curDashDuration;
 
@@ -23,16 +23,15 @@ public class Dash : IDisposable {
     public Dash(
         IPlayerInput playerInput,
         Rigidbody2D rigidbody2D,
-        float dashSpeed,
-        float dashDuration,
+        PlayerStatData statData,
         Action onStartDash,
         Action onEndDash,
         Func<bool> checkStamina
     ) {
         _playerInput = playerInput;
         _rigidbody2D = rigidbody2D;
-        _dashSpeed = dashSpeed;
-        _dashDuration = dashDuration;
+        _dashSpeed = statData.DashSpeed;
+        _dashDuration = statData.DashDuration;
         _onStartDash = onStartDash;
         _onEndDash = onEndDash;
         _checkStamina = checkStamina;
@@ -66,6 +65,13 @@ public class Dash : IDisposable {
     
     
     #region Public
+
+    public void UpdateStates(PlayerStatData statData)
+    {
+        _dashSpeed = statData.DashSpeed;
+        _dashDuration = statData.DashDuration;
+    }
+    
     public void FixedUpdate() {
         _curDashDuration += Time.fixedDeltaTime;
         

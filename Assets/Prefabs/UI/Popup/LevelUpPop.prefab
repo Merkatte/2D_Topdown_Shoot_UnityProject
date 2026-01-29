@@ -215,9 +215,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: WeaponSelectPop, Assembly-CSharp
-        m_MethodName: OnClickWeaponButton
+      - m_Target: {fileID: 3228372093883163582}
+        m_TargetAssemblyTypeName: LevelUpPop, Assembly-CSharp
+        m_MethodName: OnClickButton
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -758,9 +758,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: WeaponSelectPop, Assembly-CSharp
-        m_MethodName: OnClickWeaponButton
+      - m_Target: {fileID: 3228372093883163582}
+        m_TargetAssemblyTypeName: LevelUpPop, Assembly-CSharp
+        m_MethodName: OnClickButton
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -891,9 +891,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: WeaponSelectPop, Assembly-CSharp
-        m_MethodName: OnClickWeaponButton
+      - m_Target: {fileID: 3228372093883163582}
+        m_TargetAssemblyTypeName: LevelUpPop, Assembly-CSharp
+        m_MethodName: OnClickButton
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

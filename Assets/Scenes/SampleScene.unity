@@ -1344,8 +1344,8 @@ MonoBehaviour:
   playerRepo: {fileID: 11400000, guid: 22f60e6647fe7a64fae2b20b1c95ac79, type: 2}
   weaponRepo: {fileID: 11400000, guid: b956bd7633e2bb74b8cdf6a299c308d4, type: 2}
   enemyRepo: {fileID: 11400000, guid: 3b822f4ed38ede84f94ef1c3c193b068, type: 2}
-  levelRepo: {fileID: 0}
-  statUpRepo: {fileID: 0}
+  levelRepo: {fileID: 11400000, guid: a9306411446ae7749aca86f48bece244, type: 2}
+  statUpRepo: {fileID: 11400000, guid: 400281aea97e0524192775e791a597cc, type: 2}
 --- !u!1 &1281286834
 GameObject:
   m_ObjectHideFlags: 0

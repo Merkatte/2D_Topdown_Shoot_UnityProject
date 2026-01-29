@@ -5,6 +5,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "LevelRepo", menuName = "Scriptable Objects/LevelRepo")]
 public class LevelRepo : ScriptableObject
 {
-    public List<LevelData> Levels;
+    public List<LevelConfig> Levels;
     //public int 
 }

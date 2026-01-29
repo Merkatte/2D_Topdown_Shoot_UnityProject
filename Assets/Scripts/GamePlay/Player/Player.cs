@@ -47,8 +47,7 @@ public class Player : MonoBehaviour
         _dash = new Dash(
             playerInput,
             _rigidbody2D,
-            playerStatData.DashSpeed,
-            playerStatData.DashDuration,
+            playerStatData,
             OnStartDash,
             OnEndDash,
             CheckStamina
@@ -101,7 +100,23 @@ public class Player : MonoBehaviour
     #endregion
     
     #region public
-    
+
+    public void PlayerLevelUp(PlayerStatData playerStatData)
+    {
+        _health = playerStatData.Health;
+        _requestDashStamina = playerStatData.RequestDashStamina;
+        _stamina = playerStatData.Stamina;
+        _maxStamina = playerStatData.Stamina;
+        _staminaRecoverVal = playerStatData.StaminaRecovery;
+        _movement.UpdateStates(playerStatData);
+        _dash.UpdateStates(playerStatData);
+        
+    }
+
+    public void WeaponLevelUp(BulletStatData weaponStatData)
+    {
+        _shoot.UpdateStates(weaponStatData);
+    }
     #endregion
     #region Event
 
@@ -137,6 +152,8 @@ public class Player : MonoBehaviour
         }
 
         _shoot.Dispose();
+        _dash.Dispose();
+        _movement.Dispose();
         UnitManager.instance.OnUnitDie(UnitType.Player, gameObject.GetInstanceID());
     }
 

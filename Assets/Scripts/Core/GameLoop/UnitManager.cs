@@ -4,6 +4,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using Game.Utils;
+using UnityEditorInternal;
 using Random = UnityEngine.Random;
 
 public class UnitManager : MonoBehaviour, IUnitManager
@@ -18,7 +19,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
     [SerializeField] private int maxSpawnCount;
     
     private const int SPAWN_RATE_PER_ONCE = 4;
-    
+
+    private Dictionary<int, LevelData> _levelDict;
     private Dictionary<int, Enemy> _enemiesDict;
     private Dictionary<int, EnemyStatData> _enemiesStatDict;
 
@@ -29,6 +31,9 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private UIManager _uiManager;
     
     private CancellationTokenSource _tokenSource;
+
+    private int _currentKill = 0;
+    private int _currentLevel = 0;
 
     private bool _isSpawning = false;
     private bool _isGameOver = false;
@@ -96,6 +101,12 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _tokenSource = new CancellationTokenSource();
         SpawnEnemies().Forget();
     }
+
+    private void CheckLevelUp()
+    {
+        _currentKill++;
+        
+    }
     #endregion
 
     #region public
@@ -106,6 +117,13 @@ public class UnitManager : MonoBehaviour, IUnitManager
         StartSpawn();
     }
 
+    public void LevelUp(UpgradeCategory category)
+    {
+        if(category == UpgradeCategory.Player)
+            player.PlayerLevelUp(_statManager.GetPlayerTotalStatData());
+        else player.WeaponLevelUp(_statManager.GetBulletTotalStatData());
+    }
+    
     public void GameOver()
     {
         _tokenSource?.Cancel();
@@ -141,6 +159,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
             return;
         }
         
+        _gameManager.CheckLevelUp();
         _uiManager.ReleaseHP(instanceID);
         _poolManager.ReturnEnemy(_enemiesDict[instanceID]);
         _enemiesDict.Remove(instanceID);
