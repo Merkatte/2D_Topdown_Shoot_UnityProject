@@ -98,17 +98,12 @@ public class StatManager : MonoBehaviour
     }
     
     #region StatUpOption
-
     private UpgradeOption CreatePlayerOption(PlayerStatUpData data)
     {
         CalculateType randomCalType = data.CalculateType[
             UnityEngine.Random.Range(0, data.CalculateType.Count)
         ];
-        if (data.StatType == PlayerStatType.MoveSpeed)
-        {
-            Debug.Log(data.MinPlusVal);
-            Debug.Log(data.MaxPlusVal);
-        }
+
         float randomVal = 0;
         if (randomCalType == CalculateType.Percentage)
             randomVal = Mathf.Round(UnityEngine.Random.Range(data.MinPercentVal, data.MaxPercentVal));
@@ -178,6 +173,14 @@ public class StatManager : MonoBehaviour
         }
 
         return value;
+    }
+    #endregion
+    #region EnemyStatUp
+    private void MultiplyEnemyStat(float multiVal)
+    {
+        _addEnemyStatData.AddDamage += _enemyStatData.Damage * multiVal / 100;
+        _addEnemyStatData.AddHealth += _enemyStatData.Health * multiVal / 100;
+        _addEnemyStatData.AddMoveSpeed += _enemyStatData.MoveSpeed * multiVal / 100;
     }
     #endregion
     #endregion
@@ -288,6 +291,9 @@ public class StatManager : MonoBehaviour
                 break;
         }
     }
+
+    public void UpgradeEnemy(float multiVal) => MultiplyEnemyStat(multiVal);
+
     #endregion
 
 

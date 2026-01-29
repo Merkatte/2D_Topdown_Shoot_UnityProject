@@ -18,7 +18,6 @@ public class UserHPBar : MonoBehaviour
 
     public void SetHPSlider(float curHp, float maxHp)
     {
-        Debug.Log($"SetHPSlider {curHp}, {maxHp}");
         var value = curHp >= maxHp ? 1 : curHp / maxHp;
         hpSlider.value = value;
     }

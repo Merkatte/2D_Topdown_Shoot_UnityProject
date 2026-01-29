@@ -11,16 +11,9 @@ public class UnitManager : MonoBehaviour, IUnitManager
 {
     public static IUnitManager instance; 
     [SerializeField] private Player player;
-    [SerializeField] private Vector2 minSpawnPoint;
-    [SerializeField] private Vector2 maxSpawnPoint;
-    [SerializeField] private float noSpawnArea;
-    [SerializeField] private int spawnDelay;
-    [SerializeField] private int maxSpawnDelay;
-    [SerializeField] private int maxSpawnCount;
-    
-    private const int SPAWN_RATE_PER_ONCE = 4;
 
-    private Dictionary<int, LevelData> _levelDict;
+    private SpawnData spawnData;
+    
     private Dictionary<int, Enemy> _enemiesDict;
     private Dictionary<int, EnemyStatData> _enemiesStatDict;
 
@@ -29,16 +22,17 @@ public class UnitManager : MonoBehaviour, IUnitManager
     private StatManager _statManager;
     private PoolManager _poolManager;
     private UIManager _uiManager;
+    private DataManager _dataManager;
     
     private CancellationTokenSource _tokenSource;
 
-    private int _currentKill = 0;
-    private int _currentLevel = 0;
+    private int _additionalEnemyCount = 0;
+    private float _spawnRateMultiplier = 0;
 
     private bool _isSpawning = false;
     private bool _isGameOver = false;
     #region Init
-    public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager, UIManager uiManager)
+    public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager, UIManager uiManager, DataManager dataManager)
     {
         instance = this;
 
@@ -47,6 +41,18 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _statManager = statManager;
         _poolManager = poolManager;
         _uiManager = uiManager;
+        _dataManager = dataManager;
+
+        SpawnRepo spawnRepo = dataManager.GetSpawnRepo();
+        spawnData = new SpawnData(
+            spawnRepo.MinSpawnPoint,
+            spawnRepo.MaxSpawnPoint,
+            spawnRepo.NoSpawnArea,
+            spawnRepo.SpawnDelay,
+            spawnRepo.MaxSpawnDelay,
+            spawnRepo.MaxSpawnCount,
+            spawnRepo.SpawnRatePerOnce
+        );
         
         _enemiesDict = new Dictionary<int, Enemy>();
         _enemiesStatDict = new Dictionary<int, EnemyStatData>();
@@ -60,9 +66,11 @@ public class UnitManager : MonoBehaviour, IUnitManager
     {
         while (_tokenSource is { IsCancellationRequested: false })
         {
-            int randomSpawnDelay = Random.Range(spawnDelay, maxSpawnDelay);
+            int randomSpawnDelay = Random.Range(spawnData.SpawnDelay, spawnData.MaxSpawnDelay);
+            randomSpawnDelay -= (int)(randomSpawnDelay * _spawnRateMultiplier / 100);
+            if (randomSpawnDelay < 500) randomSpawnDelay = 500;
             await UniTask.Delay(randomSpawnDelay, cancellationToken: _tokenSource.Token);
-            int spawnEnemyCount = _enemiesDict.Count >= maxSpawnCount ? 0 : (maxSpawnCount - _enemiesDict.Count) / SPAWN_RATE_PER_ONCE + (maxSpawnCount - _enemiesDict.Count) % SPAWN_RATE_PER_ONCE;
+            int spawnEnemyCount = CalculateSpawnCount();
 
             if (spawnEnemyCount <= 0)
             {
@@ -72,13 +80,27 @@ public class UnitManager : MonoBehaviour, IUnitManager
             for (int index = 0; index < spawnEnemyCount; ++index)
             {
                 Enemy newEnemy = _poolManager.GetEnemy();
-                newEnemy.transform.position = SpawnPointCalculator.GetRandomSpawnPosition(minSpawnPoint, maxSpawnPoint,
-                    player.transform.position, noSpawnArea);
+                newEnemy.transform.position = SpawnPointCalculator.GetRandomSpawnPosition(spawnData.MinSpawnPoint, spawnData.MaxSpawnPoint,
+                    player.transform.position, spawnData.NoSpawnArea);
                 RegisterEnemy(newEnemy);
             }
         }
 
         _isSpawning = false;
+    }
+
+    private int CalculateSpawnCount()
+    {
+        int currentCount = _enemiesDict.Count;
+        int maxCount = spawnData.MaxSpawnCount;
+    
+        if (currentCount >= maxCount)
+            return 0;
+    
+        int remaining = maxCount - currentCount;
+        int spawnRate = spawnData.SpawnRatePerOnce;
+        
+        return (remaining / spawnRate) + (remaining % spawnRate);
     }
 
     private void RegisterEnemy(Enemy enemy)
@@ -101,12 +123,6 @@ public class UnitManager : MonoBehaviour, IUnitManager
         _tokenSource = new CancellationTokenSource();
         SpawnEnemies().Forget();
     }
-
-    private void CheckLevelUp()
-    {
-        _currentKill++;
-        
-    }
     #endregion
 
     #region public
@@ -124,7 +140,12 @@ public class UnitManager : MonoBehaviour, IUnitManager
             player.PlayerLevelUp(_statManager.GetPlayerTotalStatData());
         else player.WeaponLevelUp(_statManager.GetBulletTotalStatData());
     }
-    
+
+    public void NextWave(WaveData waveData)
+    {
+        _additionalEnemyCount += waveData.MaxEnemyIncrease;
+        _spawnRateMultiplier += waveData.SpawnRateMultiplier;
+    }
     public void GameOver()
     {
         _tokenSource?.Cancel();
@@ -146,7 +167,7 @@ public class UnitManager : MonoBehaviour, IUnitManager
         if (!_enemiesDict.ContainsKey(instanceID)) 
             return;
         Enemy enemyInfo =  _enemiesDict[instanceID];
-        enemyInfo.OnHit(_statManager.GetBulletTotalStatData().Damage); //TODO this magic number is for test only!!! must replace to stat data
+        enemyInfo.OnHit(_statManager.GetBulletTotalStatData().Damage);
         _uiManager.ChangeHP(enemyInfo.GetCurHP() / enemyInfo.GetTotalHP(), instanceID);
     }
     

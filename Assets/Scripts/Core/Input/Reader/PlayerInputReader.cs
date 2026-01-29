@@ -31,7 +31,6 @@ public class PlayerInputReader : MonoBehaviour
 
     private void RegisterCallbacks()
     {
-        Debug.Log("Registered");
         _moveAction.performed += OnMovePerformed;
         _moveAction.canceled += OnMoveCanceled;
         _dashAction.performed += OnDashPerformed;

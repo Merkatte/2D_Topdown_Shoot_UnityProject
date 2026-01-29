@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+
 public class GameManager : MonoBehaviour
 {
     [Header("Managers")]
@@ -15,12 +18,16 @@ public class GameManager : MonoBehaviour
     [SerializeField] private WeaponType weaponType;
     
     List<LevelData> _levelData;
+    private WaveData _waveData;
+
+    private CancellationTokenSource _waveTokenSource;
 
     private int _playerKillCount;
     private int _playerLevel = 0;
     #region Init
     public void Init()
     {
+        _waveTokenSource = new CancellationTokenSource();
         InitiateManagers();
     }
     #endregion
@@ -41,7 +48,7 @@ public class GameManager : MonoBehaviour
     {
         //GameData Init
         statManager.Init(dataManager, poolManager, weaponType);
-        unitManager.Init(this, inputManager, statManager, poolManager, uiManager);
+        unitManager.Init(this, inputManager, statManager, poolManager, uiManager, dataManager);
 
         RefineData();
         
@@ -59,6 +66,14 @@ public class GameManager : MonoBehaviour
                 levelConfigs[index].level, levelConfigs[index].requireKillCount);
             _levelData.Add(newLevelData);
         }
+
+        WaveRepo waveRepo = dataManager.GetWaveRepo();
+        _waveData = new WaveData(
+            waveRepo.WaveInterval,
+            waveRepo.EnemyStatMultiplier,
+            waveRepo.MaxEnemyIncrease,
+            waveRepo.SpawnRateMultiplier
+        );
     }
     
     void SelectWeapon()
@@ -69,6 +84,7 @@ public class GameManager : MonoBehaviour
     void StartGame()
     {
         unitManager.SetPlayer();
+        Wave().Forget();
     }
     
     void PlayerLevelUp()
@@ -79,6 +95,23 @@ public class GameManager : MonoBehaviour
         
         uiManager.OpenPopup<LevelUpPop>(PopType.LevelUpPopup).Init(options, OnUpgradeSelected);
     }
+
+    async UniTask Wave()
+    {
+        int curTime = 0;
+        while (_waveTokenSource is { IsCancellationRequested: false })
+        {
+            await UniTask.Delay(1000, cancellationToken:_waveTokenSource.Token);
+            ++curTime;
+            if (curTime >= _waveData.WaveInterval)
+            {
+                curTime = 0;
+                Debug.Log("NextWave");
+                statManager.UpgradeEnemy(_waveData.EnemyStatMultiplier);
+                unitManager.NextWave(_waveData);
+            }
+        }
+    } 
     #endregion
     
     #region public

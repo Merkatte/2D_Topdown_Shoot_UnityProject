@@ -44,7 +44,6 @@ public class Shoot : IDisposable
     {
         while (!token.IsCancellationRequested)
         {
-            Debug.Log(_fireRate);
             await UniTask.Delay(_fireRate, false, PlayerLoopTiming.Update, token);
             Vector2 mousePos = _camera.ScreenToWorldPoint(_aim.GetAimPosition());
             Vector2 playerPos =  _playerObject.transform.position;

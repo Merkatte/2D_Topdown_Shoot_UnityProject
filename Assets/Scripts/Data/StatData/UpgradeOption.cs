@@ -22,7 +22,6 @@ public struct UpgradeOption
     
     public string GetDisplayText()
     {
-        Debug.Log(CalType);
         if (CalType == CalculateType.Percentage)
             return $"{DisplayName}\n+{Value:F1}%";
         return $"{DisplayName}\n+{Value:F1}";

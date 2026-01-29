@@ -53,7 +53,6 @@ public class UIManager : MonoBehaviour
 
     public T OpenPopup<T>(PopType popType) where T : Popbase
     {
-        Debug.Log(popType);
         backGround.SetActive(true);
         _activePops.Add(popups[(int)popType]);
         popups[(int)popType].OpenPop(ClosePopup);

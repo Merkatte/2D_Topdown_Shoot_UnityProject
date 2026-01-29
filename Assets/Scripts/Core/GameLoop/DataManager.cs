@@ -8,6 +8,8 @@ public class DataManager : MonoBehaviour
     [SerializeField] private EnemyRepo enemyRepo;
     [SerializeField] private LevelRepo levelRepo;
     [SerializeField] private StatUpRepo statUpRepo;
+    [SerializeField] private SpawnRepo spawnRepo;
+    [SerializeField] private WaveRepo waveRepo;
     #region Init
 
     public void Init()
@@ -22,5 +24,7 @@ public class DataManager : MonoBehaviour
     public WeaponData GetSelectedWeaponData(WeaponType weaponType) => weaponRepo.GetWeaponData(weaponType);
     public LevelRepo GetLevelRepo() => levelRepo;
     public StatUpRepo GetStatUpRepo() => statUpRepo;
+    public SpawnRepo GetSpawnRepo() => spawnRepo;
+    public WaveRepo GetWaveRepo() => waveRepo;
     #endregion
 }

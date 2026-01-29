@@ -1739,12 +1739,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitManager
   player: {fileID: 834924194}
-  minSpawnPoint: {x: -10, y: -5}
-  maxSpawnPoint: {x: 10, y: 5}
-  noSpawnArea: 5
-  spawnDelay: 1000
-  maxSpawnDelay: 2500
-  maxSpawnCount: 8
 --- !u!1 &1113431142
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,6 +1788,8 @@ MonoBehaviour:
   enemyRepo: {fileID: 11400000, guid: 3b822f4ed38ede84f94ef1c3c193b068, type: 2}
   levelRepo: {fileID: 11400000, guid: a9306411446ae7749aca86f48bece244, type: 2}
   statUpRepo: {fileID: 11400000, guid: 400281aea97e0524192775e791a597cc, type: 2}
+  spawnRepo: {fileID: 11400000, guid: edc9867f128f3a94da2e711a722785c0, type: 2}
+  waveRepo: {fileID: 11400000, guid: 4ed5793750c79d742b2c4fa55b61877c, type: 2}
 --- !u!1 &1281286834
 GameObject:
   m_ObjectHideFlags: 0
