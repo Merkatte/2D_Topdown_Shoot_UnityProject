@@ -1,6 +1,14 @@
 using UnityEngine;
 using System;
+using TMPro;
+
 public class NumberText : MonoBehaviour
 {
-    public event Action<int> a;
+    [SerializeField] private TextMeshPro numberText;
+    [SerializeField] private string extraTextAfterNum;
+
+    public void SetText(int num)
+    {
+        numberText.text = num.ToString() + extraTextAfterNum;
+    }
 }

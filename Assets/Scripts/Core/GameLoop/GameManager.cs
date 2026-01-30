@@ -106,7 +106,7 @@ public class GameManager : MonoBehaviour
             if (curTime >= _waveData.WaveInterval)
             {
                 curTime = 0;
-                Debug.Log("NextWave");
+
                 statManager.UpgradeEnemy(_waveData.EnemyStatMultiplier);
                 unitManager.NextWave(_waveData);
             }
