@@ -4,8 +4,9 @@ using TMPro;
 
 public class NumberText : MonoBehaviour
 {
-    [SerializeField] private TextMeshPro numberText;
+    [SerializeField] private TextMeshProUGUI numberText;
     [SerializeField] private string extraTextAfterNum;
+    public NumUIType numUIType;
 
     public void SetText(int num)
     {

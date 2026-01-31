@@ -23,7 +23,35 @@ public class GameManager : MonoBehaviour
     private CancellationTokenSource _waveTokenSource;
 
     private int _playerKillCount;
-    private int _playerLevel = 0;
+
+    private int _playerLevel;
+    private int PlayerLevel
+    {
+        get
+        {
+            return _playerLevel;
+        }
+        set
+        {
+            uiManager.OnChangeNumUI(NumUIType.Level, value);
+            _playerLevel = value;
+        }
+    }
+
+    private int _waveNum;
+
+    private int WaveNum
+    {
+        get
+        {
+            return _waveNum;
+        }
+        set
+        {
+            uiManager.OnChangeNumUI(NumUIType.Wave, value);
+            _waveNum = value;
+        }
+    }
     #region Init
     public void Init()
     {
@@ -90,7 +118,7 @@ public class GameManager : MonoBehaviour
     void PlayerLevelUp()
     {
         Time.timeScale = 0;
-        ++_playerLevel;
+        ++PlayerLevel;
         var options = statManager.GetRandomUpgradeOptions(3);
         
         uiManager.OpenPopup<LevelUpPop>(PopType.LevelUpPopup).Init(options, OnUpgradeSelected);
@@ -105,11 +133,13 @@ public class GameManager : MonoBehaviour
             ++curTime;
             if (curTime >= _waveData.WaveInterval)
             {
+                ++WaveNum;
                 curTime = 0;
 
                 statManager.UpgradeEnemy(_waveData.EnemyStatMultiplier);
                 unitManager.NextWave(_waveData);
             }
+            uiManager.OnChangeNumUI(NumUIType.WaveInterval, _waveData.WaveInterval - curTime);
         }
     } 
     #endregion
@@ -124,9 +154,9 @@ public class GameManager : MonoBehaviour
     public void CheckLevelUp()
     {
         _playerKillCount++;
-        if (_playerLevel >= _levelData.Count) return;
+        if (PlayerLevel >= _levelData.Count) return;
         
-        if(_levelData[_playerLevel].requireKillCount <= _playerKillCount)
+        if(_levelData[PlayerLevel].requireKillCount <= _playerKillCount)
             PlayerLevelUp();
     }
     #endregion

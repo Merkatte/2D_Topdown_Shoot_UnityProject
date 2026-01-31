@@ -1,3 +1,4 @@
+ using System;
  using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,6 +9,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Canvas mainCanvas;
     [SerializeField] private Canvas popUpCanvas;
     [SerializeField] private Canvas statCanvas;
+    [SerializeField] private Canvas inGameCanvas;
     
     [Header("Background")]
     [SerializeField] private GameObject backGround;
@@ -17,6 +19,9 @@ public class UIManager : MonoBehaviour
     
     [Header("Basic UI")]
     [SerializeField] private UserHPBar userHPBar;
+    [SerializeField] private List<NumberText> numberTexts;
+    
+    private Dictionary<NumUIType, Action<int>> numberTextActions = new Dictionary<NumUIType, Action<int>>();
     
     
     private PoolManager _poolManager;
@@ -26,6 +31,9 @@ public class UIManager : MonoBehaviour
     public void Init(PoolManager poolManager)
     {
         _poolManager = poolManager;
+        
+        for (int index = 0; index < numberTexts.Count; ++index)
+            numberTextActions.Add(numberTexts[index].numUIType, numberTexts[index].SetText);
     }
 
     public void SetHP(int instanceID, GameObject targetObject)
@@ -82,6 +90,8 @@ public class UIManager : MonoBehaviour
     {
         player.OnHealthChanged += userHPBar.SetHPSlider;
         player.OnStaminaChanged += userHPBar.setStaminaSlider;
-        userHPBar.gameObject.SetActive(true);
+        inGameCanvas.gameObject.SetActive(true);
     }
+
+    public void OnChangeNumUI(NumUIType numUIType, int val) => numberTextActions[numUIType](val);
 }
