@@ -425,7 +425,7 @@ public class PoolManager : MonoBehaviour, IPoolManager
 
 #### 기능
 - 랜덤한 위치에서 적 스폰
-- 플레이어 주변에서는 스폰하지 아니함
+- 플레이어 주변에서는 스폰 안함
 
 <details>
 <summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
@@ -608,9 +608,9 @@ flowchart LR
 public class WeaponStatUpData
 {
     public WeaponStatType StatType;
-    public List ApplicableWeapons;  // 적용 가능한 무기
+    public List ApplicableWeapons;
     
-    public List CalculateType;   // Plus 또는 Percentage
+    public List CalculateType;
     public float MinPlusVal;
     public float MaxPlusVal;
     public float MinPercentVal;
@@ -623,6 +623,20 @@ public class WeaponStatUpData
 - 코드 수정 없이 Inspector에서 밸런싱
 - 무기별 업그레이드 필터링 (Pistol과 MachineGun은 총알 수 업그레이드 불가)
 - Plus/Percentage 랜덤 선택으로 다양성 확보
+<details>
+<summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
+
+![Gameplay](Docs/PlayerStatOption.png)
+
+- StatType : 스탯 종류
+- CalculateType : 등장 가능한 계산 방식
+
+![Gameplay](Docs/WeaponStatOption.png)
+
+- StatType : 스탯 종류
+- Applicable Weapons : 해당 스탯을 적용할 수 있는 무기
+- CalculateType : 등장 가능한 계산 방식
+</details>
 
 ---
 
@@ -684,54 +698,7 @@ private UpgradeOption CreateWeaponOption(WeaponStatUpData data)
 
 ---
 
-**4. Base + Add 패턴으로 증가 계산**
-```csharp
-private float CalculateIncreaseAmount(float value, CalculateType calculateType, float baseStat)
-{
-    switch (calculateType)
-    {
-        case CalculateType.Plus:
-            return value;  // 고정값 증가
-        case CalculateType.Percentage:
-            return baseStat * value / 100;  // 원본 기준 % 증가
-    }
-    return value;
-}
-
-// 적용 예시
-public void UpgradeWeapon(UpgradeOption upgradeOption)
-{
-    WeaponStatType statType = (WeaponStatType)upgradeOption.StatType;
-    float baseStat = 0;
-    float result = 0;
-    
-    switch (statType)
-    {
-        case WeaponStatType.Damage:
-            baseStat = _bulletStatData.Damage;  // 원본 스탯
-            result = CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
-            _addBulletStatData.AddDamage += result;  // Add에 누적
-            break;
-    }
-}
-```
-
-**Base + Add 패턴 이유:**
-- 원본(_bulletStatData.Damage)은 보존
-- 증가분(_addBulletStatData.AddDamage)만 누적
-- Percentage는 항상 원본 기준으로 계산
-- 누적 % 버그 방지 (예: 10% + 10% = 21%가 아닌 20%)
-
-**계산 예시:**
-```
-원본 데미지: 10
-1차 업그레이드: +20% → 10 * 0.2 = +2 (총 12)
-2차 업그레이드: +20% → 10 * 0.2 = +2 (총 14)  ← 12가 아닌 10 기준
-```
-
----
-
-**5. Fisher-Yates 셔플로 공정한 랜덤**
+**4. Fisher-Yates 셔플로 공정한 랜덤**
 ```csharp
 private List SelectRandomOptions(List source, int count)
 {
