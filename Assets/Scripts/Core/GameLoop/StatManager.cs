@@ -131,6 +131,9 @@ public class StatManager : MonoBehaviour
         else
             randomVal = UnityEngine.Random.Range(data.MinPlusVal, data.MaxPlusVal);
 
+        if (data.StatType == WeaponStatType.BulletNum)
+            randomVal = Mathf.Round(randomVal);
+
         return new UpgradeOption(
             UpgradeCategory.Weapon,
             (int)data.StatType,
@@ -140,7 +143,7 @@ public class StatManager : MonoBehaviour
         );
     }
     
-    private List<UpgradeOption> SelectRandomOptions(List<UpgradeOption> source, int count)
+    private List<UpgradeOption> ShuffleOptions(List<UpgradeOption> source, int count)
     {
         if (source.Count == 0)
             return new List<UpgradeOption>();
@@ -244,7 +247,7 @@ public class StatManager : MonoBehaviour
             }
         }
         
-        return SelectRandomOptions(allOptions, count);
+        return ShuffleOptions(allOptions, count);
     }
 
     public void UpgradeWeapon(UpgradeOption upgradeOption)

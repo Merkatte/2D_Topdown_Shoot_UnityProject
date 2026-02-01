@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f45f7282c721d8468e21c73fff0733c, type: 3}
   m_Name: WaveRepo
   m_EditorClassIdentifier: Assembly-CSharp::WaveRepo
-  WaveInterval: 5
-  EnemyStatMultiplier: 20
-  MaxEnemyIncrease: 5
+  WaveInterval: 30
+  EnemyStatMultiplier: 10
+  MaxEnemyIncrease: 10
   SpawnRateMultiplier: 30

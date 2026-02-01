@@ -34,7 +34,8 @@ public class UnitManager : MonoBehaviour, IUnitManager
     #region Init
     public void Init(GameManager gameManager, InputManager inputManager, StatManager statManager, PoolManager poolManager, UIManager uiManager, DataManager dataManager)
     {
-        instance = this;
+        if(instance == null)
+            instance = this;
 
         _gameManager = gameManager;
         _inputManager = inputManager;

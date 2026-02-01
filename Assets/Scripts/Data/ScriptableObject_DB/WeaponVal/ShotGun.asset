@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe41ae851db11d84d848b4382d77405b, type: 3}
   m_Name: ShotGun
   m_EditorClassIdentifier: Assembly-CSharp::BulletConfig
-  Damage: 5
-  Speed: 15
+  Damage: 10
+  BulletSpeed: 15
   KnockBack: 5
   BulletDistance: 5
   FireRate: 1500
-  BulletNum_PerShot: 15
+  BulletNum_PerShot: 5

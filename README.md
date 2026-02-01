@@ -20,6 +20,22 @@ Unity로 제작한 간단한 2D 탑다운 슈팅 게임 프로젝트입니다.
 
 ---
 
+## 게임 플로우
+
+```mermaid
+flowchart LR
+    Start["게임 시작"] --> Select["무기 선택"]
+    Select --> Spawn["적 스폰"]
+    Spawn --> Combat["전투"]
+    Combat --> LevelUp["레벨업"]
+    LevelUp --> |업그레이드 선택|Combat
+    Combat --> |사망|GameOver["게임 오버"]
+    
+    style Select fill:#e1f5fe
+    style Combat fill:#c8e6c9
+    style LevelUp fill:#fff9c4
+```
+
 ## ✨ 세부 구현 시스템
 
 ### 1. 플레이어 입력 처리
@@ -66,7 +82,7 @@ flowchart LR
     style Player fill:#fff9c4
 ```
 
-**핵심 구현**
+#### 핵심 구현
 
 **1. Interface 기반 추상화**
 ```csharp
@@ -131,7 +147,7 @@ public class PlayerInputProvider : IPlayerInput
 - Input System 교체 시 Reader만 수정하게 하기 위하여 분리
 
 
-**클래스 코드 보기**
+#### 클래스 코드 보기
 
 | 클래스 | 역할 | 코드 |
 |--------|------|------|
@@ -149,49 +165,608 @@ public class PlayerInputProvider : IPlayerInput
 
 ---
 
-### 2. Wave 난이도 증가
-- UniTask 비동기 타이머
-- Wave별 적 스탯/스폰 속도 증가
-- 실시간 UI 업데이트
+### 2. 무기 시스템
 
-### 3. 오브젝트 풀링
-- Generic Pool 패턴 구현
-- 총알/적 재사용으로 GC 최소화
+![Gameplay](Docs/WeaponSelect.png)
 
-### 4. 무기 시스템
-- 전략 패턴 (IAttack Interface)
-- 3종 무기 (Pistol, Shotgun, MachineGun)
-- 런타임 무기 전환
+#### 기능
+- 3종 무기 선택(Pistol, MachineGun, Shotgun)
+- 무기별 고유 발사 패턴
 
-### 5. UI 자동 업데이트
-- Property Setter + Dictionary 패턴
-- Inspector 기반 UI 등록
-- 중앙 집중식 UI 관리
+<details>
+<summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
+
+#### 설계 의도
+
+**목표**
+- 무기 추가/변경 시 기존 코드 수정 최소화
+- 데이터와 로직의 완전 분리
+
+**의도**
+- Shoot 클래스는 어떤 무기인지 알 필요 없이, "공격"만 전달
+- 각 무기는 공통 로직은 재사용하며 고유 로직만 구현
+- 밸런싱(데이터)과 구현(로직)을 분리
+
+#### 구조도
+```mermaid
+flowchart TD
+    User[User 선택] --> GM[GameManager]
+    GM --> |WeaponType|SM[StatManager]
+    
+    WR[WeaponRepoScriptableObject] --> |WeaponData|SM
+    
+    UM[UnitManager] --> |GetBulletOriginData 요청|SM
+    SM --> |BulletStatData + IAttack|UM
+    
+    UM --> |Init 주입|Player
+    Player --> |생성 시 전달|Shoot
+    
+    Shoot --> |OrderAttack|IAttack
+    
+    IAttack -.구현.-> AB[AttackBase]
+    AB --> MG[MachineGun]
+    AB --> SG[Shotgun]
+    AB --> PS["Pistol(Attackbase)"]
+    
+    style SM fill:#ffe0b2
+    style UM fill:#c8e6c9
+    style Player fill:#fff9c4
+    style IAttack fill:#e1f5fe
+```
+
+#### 핵심 구현
+
+**1. Interface 기반 무기 추상화**
+```csharp
+public interface IAttack
+{
+    public void Init(BulletStatData data);
+    public void OrderAttack(Vector2 position, Vector2 direction);
+    public void Upgrade(BulletStatData data);
+}
+```
+- 새로운 무기가 추가되어도 Shoot은 무기의 종류 상관없이 초기화, 공격, 업그레이드만 알게하기 위하여 Interface를 이용하여 구현
+
+**2. 상속을 통한 공통 로직 재사용**
+
+```csharp
+// AttackBase.cs
+public class AttackBase : IAttack
+{
+    protected BulletStatData curStatData;
+    protected IPoolManager _poolManager;
+    
+    public void Init(BulletStatData data)
+    {
+        curStatData = data;
+        _poolManager = PoolManager.instance;
+    }
+    
+    protected virtual void Attack(Vector2 startPosition, Vector2 direction)
+    {
+        BulletMove bullet = _poolManager.GetBulletMove();
+        bullet.Init(curStatData.BulletSpeed, direction, startPosition, 
+                   curStatData.BulletDistance, _poolManager);
+    }
+}
+
+// Shotgun.cs
+public class Shotgun : AttackBase
+{
+    private float spread = 30f;
+    
+    protected override void Attack(Vector2 startPosition, Vector2 direction)
+    {
+        for (int i = 0; i < curStatData.BulletNum_PerShot; i++)
+        {
+            float randomAngle = Random.Range(-spread / 2f, spread / 2f);
+            Vector2 randomDir = RotateVector(direction, randomAngle);
+            // 총알 생성...
+        }
+    }
+}
+```
+- 최소한의 구현으로 새로운 무기를 생성하기 용이하게 하기 위하여 상속을 채택
+
+**3. 데이터와 로직의 분리**
+```csharp
+// WeaponData.cs
+public class WeaponData
+{
+    public WeaponType WeaponType;      // 무기 타입
+    public BulletConfig WeaponVal;     // 데이터 (ScriptableObject)
+    public IAttack Weapon;             // 로직 (C# 클래스)
+}
+
+// WeaponRepo.cs
+public WeaponData GetWeaponData(WeaponType weaponType)
+{
+    if (data.Weapon == null)  // 런타임에 생성
+    {
+        switch (data.WeaponType)
+        {
+            case WeaponType.Pistol:
+                data.Weapon = new AttackBase();
+                break;
+            case WeaponType.MachineGun:
+                data.Weapon = new MachineGun();
+                break;
+            case WeaponType.ShotGun:
+                data.Weapon = new Shotgun();
+                break;
+        }
+    }
+    return data;
+}
+```
+
+- 빠른 무기 밸런싱을 위한 데이터와 로직 분리
+
+#### 클래스 코드 보기
+
+| 클래스 | 역할 | 코드 |
+|--------|------|------|
+| **IAttack** | 무기 인터페이스 | [`보기`](Assets/Scripts/GamePlay/Attack/AttackBase/IAttack.cs) |
+| **AttackBase** | 공통 로직 | [`보기`](Assets/Scripts/GamePlay/Attack/AttackBase/AttackBase.cs) |
+| **MachineGun** | 연사 패턴 | [`보기`](Assets/Scripts/GamePlay/Attack/AttackBase/MachineGun.cs) |
+| **Shotgun** | 산탄 패턴 | [`보기`](Assets/Scripts/GamePlay/Attack/AttackBase/Shotgun.cs) |
+| **WeaponData** | 무기 데이터 | [`보기`](Assets/Scripts/Data/WeaponData/WeaponData.cs) |
+| **WeaponRepo** | 무기 관리 | [`보기`](Assets/Scripts/Data/ScriptableObject_DB/WeaponRepo.cs) |
+| **Shoot** | 발사 제어 | [`보기`](Assets/Scripts/GamePlay/Attack/Basic/Shoot.cs) |
+
+</details>
 
 ---
 
-## 🏗️ 아키텍처
 
-### Manager 패턴
+### 3. 오브젝트 풀링
+
+![Gameplay](Docs/Pooling.gif)
+
+#### 기능
+- 적, 총알 등과 같은 오브젝트 반환
+
+<details>
+<summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
+
+#### 설계 의도
+
+**목표**
+- 어떤 오브젝트를 요청받던 넘겨줘야함
+- 한 스크립트 안에서 해결
+- Singleton을 사용하더라도 최대한 다른 스크립트들이 구조를 몰라야함
+
+**의도**
+- 제너릭 클래스를 이용하여 어떠한 종류의 오브젝트든 저장하도록 설계
+- IPoolmanager라는 interface를 만들고 이를 Singleton으로 만들어 최대한 분리
+
+#### 구조도
+```mermaid
+flowchart TD
+    Shoot["Shoot (Weapon)"] -->|"GetBullet()"| IPool["IPoolManager(Singleton)"]
+    IPool -->|"BulletMove"| Shoot
+
+    Shoot -->|"Init: dir / speed / dmg"| BulletMove
+    BulletMove -->|"Hit or range end"| IPool
+    IPool -->|"ReturnObject()"| Pool["PoolManager"]
 ```
-GameManager  (게임 흐름 총괄)
-├─ DataManager   (ScriptableObject 관리)
-├─ StatManager   (스탯 계산/업그레이드)
-├─ UnitManager   (유닛 생성/관리)
-├─ PoolManager   (오브젝트 풀링)
-├─ InputManager  (입력 처리)
-└─ UIManager     (UI 업데이트)
+
+#### 핵심 구현
+
+**1. 제네릭 클래스를 이용한 ObjectPool 구현**
+```csharp
+//PoolManager.cs
+public class PoolManager : MonoBehaviour, IPoolManager
+{
+    ...
+    //InGame
+    private GameObjectPool<BulletMove> _bulletPool;
+    ...
+}
+
+//GameObjectPool.cs
+public class GameObjectPool<T> where T : MonoBehaviour
+{
+    private readonly T _prefab;
+    private readonly IObjectPool<T> _pool;
+
+    public GameObjectPool(T prefab, int defaultCapacity = 10, int maxSize = 100)
+    {
+        _prefab = prefab;
+        _pool = new ObjectPool<T>(
+            createFunc: Create,
+            actionOnGet: OnGet,
+            ...
+        );
+    }
+    ...
+}
+```
+- 제너릭 클래스를 만들어 PoolManager가 다른 여러개의 풀링을 관리할 수 있도록 설계
+
+**2. Interface Singleton**
+```csharp
+//IPoolManager.cs
+public interface IPoolManager
+{
+    public BulletMove GetBulletMove();
+    public Enemy GetEnemy();
+    public void ReturnBullet(BulletMove obj);
+    public void ReturnEnemy(Enemy obj);
+}
+
+//PoolManager.cs
+public class PoolManager : MonoBehaviour, IPoolManager
+{
+    public static IPoolmanger instance;
+
+    ...
+}
 ```
 
-### 핵심 설계 패턴
+- Interface를 바라보게 하여 의존성 분리
 
-| 패턴 | 적용 위치 | 목적 |
-|------|----------|------|
-| **Manager** | 전체 구조 | 책임 분리 |
-| **Strategy** | 무기 시스템 | 런타임 교체 |
-| **Object Pool** | 총알/적 | GC 최적화 |
-| **Observer** | UI/이벤트 | 느슨한 결합 |
-| **Data-Driven** | ScriptableObject | 밸런싱 용이 |
+#### 클래스 코드 보기
+
+| 클래스 | 역할 | 코드 |
+|--------|------|------|
+| **PoolManager** | 풀링 관리 | [`보기`](Assets/Scripts/Core/GameLoop/PoolManager.cs) |
+| **IPoolManager** | 풀링 인터페이스 | [`보기`](Assets/Scripts/Core/GameLoop/Interface/IPoolManager.cs) |
+| **Shoot** | 발사 제어 | [`보기`](Assets/Scripts/GamePlay/Attack/Basic/Shoot.cs) |
+| **BulletMove** | 총알 오브젝트 | [`보기`](Assets/Scripts/GamePlay/Attack/BulletMove.cs) |
+
+</details>
+
+---
+
+### 4. 적 스폰
+
+![Gameplay](Docs/Spawn.gif)
+
+#### 기능
+- 랜덤한 위치에서 적 스폰
+- 플레이어 주변에서는 스폰하지 아니함
+
+<details>
+<summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
+
+#### 설계 의도
+
+**목표**
+- ScriptableObject로 넘겨받은 데이터를 토대로 스폰
+- 플레이어의 주변에서는 스폰을 하면 안됨
+
+**의도**
+- 무기와 같이 Inspector에서 밸런싱이 가능해야 하기에 ScriptableObject 사용
+- 현재 플레이어 위치를 토대로 계산하여 적 스폰 위치 계산
+- Util형태로 namespace를 통해 어디서든 접근가능하게 설계
+
+#### 구조도
+
+```mermaid
+flowchart TD
+    UnitManager --> |Player Position|SpawnPointCalculator
+    SpawnPointCalculator --> |Spawn Point|UnitManager
+```
+
+#### 핵심구현
+```csharp
+//SpawnCalculator.cs
+public static Vector2 GetRandomSpawnPosition(Vector2 minPoint, Vector2 maxPoint, Vector2 playerPosition, float minDistance)
+{
+    float maxDistance = GetMaxDistanceFromPlayer(
+        playerPosition,
+        minPoint,
+        maxPoint
+    );
+
+
+    float randomDistance = Random.Range(minDistance, maxDistance);
+    float randomAngle = Random.Range(0f, 360f);
+
+
+    Vector2 direction = new Vector2(
+        Mathf.Cos(randomAngle * Mathf.Deg2Rad),
+        Mathf.Sin(randomAngle * Mathf.Deg2Rad)
+    );
+
+    Vector2 spawnPos = playerPosition + direction * randomDistance;
+
+
+    spawnPos.x = Mathf.Clamp(spawnPos.x, minPoint.x, maxPoint.x);
+    spawnPos.y = Mathf.Clamp(spawnPos.y, minPoint.y, maxPoint.y);
+
+    return spawnPos;
+}
+
+private static float GetMaxDistanceFromPlayer(Vector2 playerPos, Vector2 minPoint, Vector2 maxPoint)
+{
+    Vector2[] corners = new Vector2[]
+    {
+        new Vector2(minPoint.x, minPoint.y),
+        new Vector2(minPoint.x, maxPoint.y),
+        new Vector2(maxPoint.x, minPoint.y),
+        new Vector2(maxPoint.x, maxPoint.y)
+    };
+
+    float maxDistance = 0f;
+
+    foreach (var corner in corners)
+    {
+        float distance = Vector2.Distance(playerPos, corner);
+        if (distance > maxDistance)
+        {
+            maxDistance = distance;
+        }
+    }
+
+    return maxDistance;
+}
+```
+
+- 플레이어로부터 minDistance 이상 떨어진 곳에 스폰
+- 랜덤을 이용하여 균등하게 스폰
+- 지정한 범위 내에서만 스폰
+
+#### 클래스 코드 보기
+
+| 클래스 | 역할 | 코드 |
+|--------|------|------|
+| **UnitManager** | 유닛 관리 | [`보기`](Assets/Scripts/Core/GameLoop/PoolManager.cs) |
+| **SpawnPointCalculator** | 스폰 위치 계산 | [`보기`](Assets/Scripts/Core/GameLoop/Interface/IPoolManager.cs) |
+
+</details>
+
+---
+
+### 5. 랜덤 스탯 업
+
+![Gameplay](Docs/LevelUp.gif)
+
+#### 기능
+- 레벨업 시 랜덤한 3개의 스탯 선택지
+- 사용하는 무기에 따라 특정 선택지 출현
+- Plus/Percentage 두 가지 증가 방식
+
+<details>
+<summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
+
+#### 설계 의도
+
+**목표**
+- ScriptableObject로 빠른 밸런싱
+- 무기별 특화 업그레이드 제공
+- 원본 스탯 기준 일관된 증가율 보장
+
+**의도**
+- Inspector에서 수치 조정만으로 밸런싱 완료
+- 현재 사용 중인 무기와 관련된 업그레이드만 선택지에 포함
+- Base + Add 패턴으로 항상 원본 스탯을 기준으로 % 계산
+
+#### 구조도
+```mermaid
+flowchart LR
+    subgraph Kill["1. 적 처치"]
+        P1[Player Kill]
+        UM1[UnitManager]
+        GM1[GameManager]
+        
+        P1 --> UM1
+        UM1 --> GM1
+    end
+    
+    subgraph LevelUp["2. 레벨업 체크"]
+        Check{레벨업?}
+        Pause[게임 멈춤]
+        
+        GM1 --> Check
+        Check --> |Yes|Pause
+    end
+    
+    subgraph Select["3. 업그레이드 선택"]
+        SM1[StatManager]
+        SR[StatUpRepo]
+        UI[UIManager]
+        User[User Select]
+        
+        Pause --> SM1
+        SR -.-> SM1
+        SM1 --> |3개 옵션|UI
+        UI --> User
+    end
+    
+    subgraph Apply["4. 적용"]
+        GM2[GameManager]
+        SM2[StatManager]
+        UM2[UnitManager]
+        P2[Player]
+        Resume[게임 재개]
+        
+        User --> GM2
+        GM2 --> SM2
+        SM2 --> UM2
+        UM2 --> P2
+        P2 --> Resume
+    end
+    
+    style GM1 fill:#fff9c4
+    style GM2 fill:#fff9c4
+    style SM1 fill:#ffe0b2
+    style SM2 fill:#ffe0b2
+    style UI fill:#c8e6c9
+    style SR fill:#e1f5fe
+```
+
+---
+
+#### 핵심 구현
+
+**1. ScriptableObject 기반 업그레이드 데이터**
+```csharp
+// StatUpRepo.cs
+[Serializable]
+public class WeaponStatUpData
+{
+    public WeaponStatType StatType;
+    public List ApplicableWeapons;  // 적용 가능한 무기
+    
+    public List CalculateType;   // Plus 또는 Percentage
+    public float MinPlusVal;
+    public float MaxPlusVal;
+    public float MinPercentVal;
+    public float MaxPercentVal;
+    
+    public string DisplayName;
+}
+```
+
+- 코드 수정 없이 Inspector에서 밸런싱
+- 무기별 업그레이드 필터링 (Pistol과 MachineGun은 총알 수 업그레이드 불가)
+- Plus/Percentage 랜덤 선택으로 다양성 확보
+
+---
+
+**2. 무기별 필터링 + 랜덤 선택**
+```csharp
+// StatManager.cs
+public List GetRandomUpgradeOptions(int count = 3)
+{
+    StatUpRepo statUpRepo = _dataManager.GetStatUpRepo();
+    List allOptions = new List();
+    
+    foreach (var data in statUpRepo.PlayerStatUpData)
+    {
+        allOptions.Add(CreatePlayerOption(data));
+    }
+    
+    foreach (var data in statUpRepo.WeaponStatUpData)
+    {
+        if (data.ApplicableWeapons.Contains(_curWeaponType))
+        {
+            allOptions.Add(CreateWeaponOption(data));
+        }
+    }
+    
+    return SelectRandomOptions(allOptions, count);
+}
+```
+
+- Shotgun 사용 시 → Shotgun 관련 업그레이드 추가 표시
+- 무의미한 선택지 제거(Pistol, MachineGun 사용 시)
+
+---
+
+**3. Plus/Percentage 랜덤 계산**
+```csharp
+private UpgradeOption CreateWeaponOption(WeaponStatUpData data)
+{
+    CalculateType randomCalType = data.CalculateType[
+        Random.Range(0, data.CalculateType.Count)
+    ];
+    
+    float randomVal = 0;
+    if (randomCalType == CalculateType.Percentage)
+        randomVal = Mathf.Round(Random.Range(data.MinPercentVal, data.MaxPercentVal));
+    else
+        randomVal = Random.Range(data.MinPlusVal, data.MaxPlusVal);
+    
+    return new UpgradeOption(
+        UpgradeCategory.Weapon,
+        (int)data.StatType,
+        data.DisplayName,
+        randomVal,
+        randomCalType
+    );
+}
+```
+
+- 같은 스탯도 Plus/Percentage로 다르게 등장
+
+---
+
+**4. Base + Add 패턴으로 증가 계산**
+```csharp
+private float CalculateIncreaseAmount(float value, CalculateType calculateType, float baseStat)
+{
+    switch (calculateType)
+    {
+        case CalculateType.Plus:
+            return value;  // 고정값 증가
+        case CalculateType.Percentage:
+            return baseStat * value / 100;  // 원본 기준 % 증가
+    }
+    return value;
+}
+
+// 적용 예시
+public void UpgradeWeapon(UpgradeOption upgradeOption)
+{
+    WeaponStatType statType = (WeaponStatType)upgradeOption.StatType;
+    float baseStat = 0;
+    float result = 0;
+    
+    switch (statType)
+    {
+        case WeaponStatType.Damage:
+            baseStat = _bulletStatData.Damage;  // 원본 스탯
+            result = CalculateIncreaseAmount(upgradeOption.Value, upgradeOption.CalType, baseStat);
+            _addBulletStatData.AddDamage += result;  // Add에 누적
+            break;
+    }
+}
+```
+
+**Base + Add 패턴 이유:**
+- 원본(_bulletStatData.Damage)은 보존
+- 증가분(_addBulletStatData.AddDamage)만 누적
+- Percentage는 항상 원본 기준으로 계산
+- 누적 % 버그 방지 (예: 10% + 10% = 21%가 아닌 20%)
+
+**계산 예시:**
+```
+원본 데미지: 10
+1차 업그레이드: +20% → 10 * 0.2 = +2 (총 12)
+2차 업그레이드: +20% → 10 * 0.2 = +2 (총 14)  ← 12가 아닌 10 기준
+```
+
+---
+
+**5. Fisher-Yates 셔플로 공정한 랜덤**
+```csharp
+private List SelectRandomOptions(List source, int count)
+{
+    if (count >= source.Count)
+        return new List(source);
+    
+    List shuffled = new List(source);
+    
+    for (int i = shuffled.Count - 1; i > 0; i--)
+    {
+        int randomIndex = Random.Range(0, i + 1);
+        
+        UpgradeOption temp = shuffled[i];
+        shuffled[i] = shuffled[randomIndex];
+        shuffled[randomIndex] = temp;
+    }
+    
+    return shuffled.GetRange(0, count);
+}
+```
+
+- 모든 업그레이드가 동일한 확률로 선택
+- Random.Range만 사용 시 편향 발생 가능
+- Fisher-Yates는 균등 분포 보장
+
+#### 클래스 코드 보기
+
+| 클래스 | 역할 | 코드 |
+|--------|------|------|
+| **StatManager** | 스탯 계산/업그레이드 | [`보기`](Assets/Scripts/Core/GameLoop/StatManager.cs) |
+| **StatUpRepo** | 업그레이드 데이터 | [`보기`](Assets/Scripts/Data/ScriptableObject_DB/StatUpRepo.cs) |
+| **UpgradeOption** | 업그레이드 옵션 구조체 | [`보기`](Assets/Scripts/Data/UpgradeOption.cs) |
+| **GameManager** | 레벨업 처리 | [`보기`](Assets/Scripts/Core/GameLoop/GameManager.cs) |
+
+</details>
 
 ---
 
