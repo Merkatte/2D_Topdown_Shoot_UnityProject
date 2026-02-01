@@ -34,6 +34,16 @@ Unity로 제작한 간단한 2D 탑다운 슈팅 게임 프로젝트입니다.
 <details>
 <summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
 
+#### 설계 의도
+
+**목표**
+- 입력 계층의 완전한 격리와 변경 영향 최소화
+
+**의도**
+- Input 관련 클래스는 오직 Input만 담당
+- 다른 로직(이동, 대쉬, 조준 등)은 일절 관여하지 않음
+- 입력 처리의 결과만 외부에 노출
+
 #### 구조도
 ```mermaid
 flowchart LR
@@ -55,8 +65,10 @@ flowchart LR
     style UnitMgr fill:#c8e6c9
     style Player fill:#fff9c4
 ```
-**1. Interface 기반 설계** [`IPlayerInput`](Assets/Scripts/Input/IPlayerInput.cs)
 
+**핵심 구현**
+
+**1. Interface 기반 추상화**
 ```csharp
 public interface IPlayerInput
 {
@@ -68,9 +80,74 @@ public interface IPlayerInput
     event Action<Vector2> OnDashPressed;
 }
 ```
-- 
+-  Movement/Dash/Aim은 Provider가 어떻게 입력을 처리하는지 알 필요 없이, 입력 변경 사실만 알면 되기에 Interface를 사용하여 구현 세부 은닉
+
+**2. Event-Driven 아키텍처**
+```csharp
+//PlayerInputProvider.cs
+public void UpdateMoveDirection(Vector2 direction) {
+    CurrentMoveDirection = direction;
+    OnMove?.Invoke(direction);  // Event 발행
+}
+
+//Movement.cs
+public Movement(IPlayerInput playerInput, ...) {
+    playerInput.OnMove += HandleMovePerformed;
+}
+```
+- Provider와 Movement 간 직접 참조를 제거하기 위해 Event 사용
+
+**3. Provider-Reader 분리**
+```csharp
+//PlayerInputReader.cs
+public class PlayerInputReader : MonoBehaviour
+{
+    ...
+    private void OnMovePerformed(InputAction.CallbackContext ctx)
+    {
+        Vector2 direction = ctx.ReadValue<Vector2>();
+        _playerInputProvider.UpdateMoveDirection(direction);
+    }
+    ...
+}
+
+//PlayerInputProvider.cs
+public class PlayerInputProvider : IPlayerInput
+{
+    public event Action<Vector2> OnMove;
+    ...
+
+    public void UpdateMoveDirection(Vector2 direction)
+    {
+        CurrentMoveDirection = direction;
+        LastMoveDirection = direction;
+        OnMove?.Invoke(CurrentMoveDirection);
+    }
+    ...
+}
+```
+- Reader : Unity Input System 처리
+- Provider : Event 발행만
+- Input System 교체 시 Reader만 수정하게 하기 위하여 분리
+
+
+**클래스 코드 보기**
+
+| 클래스 | 역할 | 코드 |
+|--------|------|------|
+| **IPlayerInput** | 입력 인터페이스 | [`보기`](Assets/Scripts/Core/Input/Interface/IPlayerInput.cs#L1-L12) |
+| **PlayerInputProvider** | IPlayerInput 구현 | [`보기`](Assets/Scripts/Core/Input/Provider/PlayerInputProvider.cs) |
+| **PlayerInputReader** | Unity Input 연결 | [`보기`](Assets/Scripts/Core/Input/Reader/PlayerInputReader.cs) |
+| **InputManager** | 입력 관리 | [`보기`](Assets/Scripts/Core/GameLoop/InputManager.cs) |
+| **UnitManager** | 유닛 관리 | [`보기`](Assets/Scripts/Core/GameLoop/UnitManager.cs) |
+| **Player** | 플레이어 | [`보기`](Assets/Scripts/GamePlay/Player/Player.cs) |
+| **Movement** | 이동 로직 | [`보기`](Assets/Scripts/GamePlay/Player/Action/Movement.cs) |
+| **Dash** | 대쉬 로직 | [`보기`](Assets/Scripts/GamePlay/Player/Action/Dash.cs) |
+| **Aim** | 조준 로직 | [`보기`](Assets/Scripts/GamePlay/Player/Action/Aim.cs) |
 
 </details>
+
+---
 
 ### 2. Wave 난이도 증가
 - UniTask 비동기 타이머
