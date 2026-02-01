@@ -24,6 +24,24 @@ Unity로 제작한 간단한 2D 탑다운 슈팅 게임 프로젝트입니다.
 
 ![Gameplay](Docs/Movement.gif)
 
+```mermaid
+flowchart TD
+    InputSystem[Unity Input System]
+    
+    InputSystem --> InputManager
+    InputManager --> PlayerInputReader
+    PlayerInputReader --> PlayerInputProvider
+
+    PlayerInputProvider -->|IPlayerInput| Movement
+    PlayerInputProvider -->|IPlayerInput| Dash
+
+    Movement --> Rigidbody2D
+    Dash --> Rigidbody2D
+
+    Player[Player (MonoBehaviour)]
+    Player --> Movement
+    Player --> Dash
+
 ### 1. 로그라이크 레벨업 시스템
 - 랜덤 업그레이드 옵션 생성 (Percentage/Plus)
 - Base + Add 패턴으로 스탯 누적 관리
