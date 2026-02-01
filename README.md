@@ -26,19 +26,19 @@ Unity로 제작한 간단한 2D 탑다운 슈팅 게임 프로젝트입니다.
 
 ```mermaid
 flowchart TD
-    InputSystem[Unity Input System]
-    
+    InputSystem["Unity Input System"]
+
     InputSystem --> InputManager
     InputManager --> PlayerInputReader
     PlayerInputReader --> PlayerInputProvider
 
-    PlayerInputProvider -->|IPlayerInput| Movement
-    PlayerInputProvider -->|IPlayerInput| Dash
+    PlayerInputProvider -->|"IPlayerInput"| Movement
+    PlayerInputProvider -->|"IPlayerInput"| Dash
 
     Movement --> Rigidbody2D
     Dash --> Rigidbody2D
 
-    Player[Player (MonoBehaviour)]
+    Player["Player (MonoBehaviour)"]
     Player --> Movement
     Player --> Dash
 
