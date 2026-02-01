@@ -22,7 +22,7 @@ Unity로 제작한 간단한 2D 탑다운 슈팅 게임 프로젝트입니다.
 
 ## ✨ 핵심 구현 시스템
 
-![Gameplay](Docs/gameplay.gif)
+![Gameplay](Docs/Movement.gif)
 
 ### 1. 로그라이크 레벨업 시스템
 - 랜덤 업그레이드 옵션 생성 (Percentage/Plus)
