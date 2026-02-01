@@ -480,7 +480,6 @@ public class PoolManager : MonoBehaviour, IPoolManager
 **의도**
 - 무기와 같이 Inspector에서 밸런싱이 가능해야 하기에 ScriptableObject 사용
 - 현재 플레이어 위치를 토대로 계산하여 적 스폰 위치 계산
-- Util형태로 namespace를 통해 어디서든 접근가능하게 설계
 
 #### 구조도
 
@@ -587,8 +586,8 @@ private static float GetMaxDistanceFromPlayer(Vector2 playerPos, Vector2 minPoin
 - 원본 스탯 기준 일관된 증가율 보장
 
 **의도**
-- Inspector에서 수치 조정만으로 밸런싱 완료
-- 현재 사용 중인 무기와 관련된 업그레이드만 선택지에 포함
+- Inspector에서 수치 조정 및 추가 만으로 적용 가능하게 설계
+- 출현 스탯과 출현 계산식을 Inspector에서 조정할 수 있게 설계
 
 #### 구조도
 ```mermaid
