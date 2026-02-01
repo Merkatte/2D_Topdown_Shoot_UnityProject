@@ -20,33 +20,57 @@ Unity로 제작한 간단한 2D 탑다운 슈팅 게임 프로젝트입니다.
 
 ---
 
-## ✨ 핵심 구현 시스템
+## ✨ 세부 구현 시스템
+
+### 1. 플레이어 입력 처리
 
 ![Gameplay](Docs/Movement.gif)
 
+#### 기능
+- WASD를 이용한 이동
+- SpaceBar를 이용한 순간적인 대쉬
+- 마우스 방향을 따라 자동 조준
+
+<details>
+<summary><b>📖 세부 설명 (클릭하여 펼치기)</b></summary>
+
+#### 구조도
 ```mermaid
-flowchart TD
-    InputSystem["Unity Input System"]
-
-    InputSystem --> InputManager
-    InputManager --> PlayerInputReader
-    PlayerInputReader --> PlayerInputProvider
-
-    PlayerInputProvider -->|"IPlayerInput"| Movement
-    PlayerInputProvider -->|"IPlayerInput"| Dash
-
-    Movement --> Rigidbody2D
-    Dash --> Rigidbody2D
-
-    Player["Player - MonoBehaviour"]
+flowchart LR
+    Input["Unity Input<br/>System"] --> Reader["PlayerInput<br/>Reader"]
+    Reader --> Provider["PlayerInput<br/>Provider<br/>(IPlayerInput)"]
+    Provider --> InputMgr["Input<br/>Manager"]
+    InputMgr --> UnitMgr["Unit<br/>Manager"]
+    UnitMgr --> Player["Player"]
+    
     Player --> Movement
     Player --> Dash
+    Player --> Aim
+    
+    Movement -.->|Event 구독| Provider
+    Dash -.->|Event 구독| Provider
+    Aim -.->|Event 구독| Provider
+    
+    style Provider fill:#e1f5fe
+    style UnitMgr fill:#c8e6c9
+    style Player fill:#fff9c4
 ```
+**1. Interface 기반 설계** [`IPlayerInput`](Assets/Scripts/Input/IPlayerInput.cs)
 
-### 1. 로그라이크 레벨업 시스템
-- 랜덤 업그레이드 옵션 생성 (Percentage/Plus)
-- Base + Add 패턴으로 스탯 누적 관리
-- ScriptableObject 기반 밸런싱
+```csharp
+public interface IPlayerInput
+{
+    event Action<Vector2> OnMove;
+    event Action OnMoveCanceled;
+    event Action<Vector2> OnAim;
+    Vector2 CurrentMoveDirection { get; }
+    Vector2 CurrentAimPosition { get; }
+    event Action<Vector2> OnDashPressed;
+}
+```
+- 
+
+</details>
 
 ### 2. Wave 난이도 증가
 - UniTask 비동기 타이머
