@@ -105,20 +105,23 @@ Assets/
 
 #### 구조도
 ```mermaid
-flowchart LR
-    Input["Unity Input<br/>System"] --> Reader["PlayerInput<br/>Reader"]
-    Reader --> Provider["PlayerInput<br/>Provider<br/>(IPlayerInput)"]
-    Provider --> InputMgr["Input<br/>Manager"]
-    InputMgr --> UnitMgr["Unit<br/>Manager"]
+flowchart TD
+    Input["Unity Input System"] --> Reader["PlayerInputReader"]
+    Reader --> Provider["PlayerInputProvider<br/>(IPlayerInput)"]
+    Provider --> InputMgr["InputManager"]
+    InputMgr --> UnitMgr["UnitManager"]
     UnitMgr --> Player["Player"]
     
-    Player --> Movement
-    Player --> Dash
-    Player --> Aim
+    Player --> Movement["Movement"]
+    Player --> Dash["Dash"]
+    Player --> Aim["Aim"]
     
-    Movement -.->|Event 구독| Provider
-    Dash -.->|Event 구독| Provider
-    Aim -.->|Event 구독| Provider
+    Provider -.->|"Event 구독"| Movement
+    Provider -.->|"Event 구독"| Dash
+    Provider -.->|"Event 구독"| Aim
+    
+    style Provider fill:#e1f5fe
+    style Player fill:#fff9c4
 ```
 
 #### 핵심 구현
@@ -229,24 +232,24 @@ public class PlayerInputProvider : IPlayerInput
 #### 구조도
 ```mermaid
 flowchart TD
-    User[User 선택] --> GM[GameManager]
-    GM --> |WeaponType|SM[StatManager]
+    User["User 선택"] --> GM["GameManager"]
+    GM --> SM["StatManager"]
+    SM --> UM["UnitManager"]
+    UM --> Player["Player"]
+    Player --> Shoot["Shoot"]
+    Shoot --> IAttack["IAttack"]
     
-    WR[WeaponRepoScriptableObject] --> |WeaponData|SM
+    WR["WeaponRepo"] -.-> SM
+    IAttack -.-> AB["AttackBase"]
     
-    UM[UnitManager] --> |GetBulletOriginData 요청|SM
-    SM --> |BulletStatData + IAttack|UM
-    
-    UM --> |Init 주입|Player
-    Player --> |생성 시 전달|Shoot
-    
-    Shoot --> |OrderAttack|IAttack
-    
-    IAttack -.구현.-> AB[AttackBase]
-    AB --> MG[MachineGun]
-    AB --> SG[Shotgun]
+    AB --> MG["MachineGun"]
+    AB --> SG["Shotgun"]
     AB --> PS["Pistol(Attackbase)"]
-
+    
+    style SM fill:#ffe0b2
+    style UM fill:#c8e6c9
+    style Player fill:#fff9c4
+    style IAttack fill:#e1f5fe
 ```
 
 #### 핵심 구현
@@ -378,12 +381,15 @@ public WeaponData GetWeaponData(WeaponType weaponType)
 #### 구조도
 ```mermaid
 flowchart TD
-    Shoot["Shoot (Weapon)"] -->|"GetBullet()"| IPool["IPoolManager(Singleton)"]
+    Shoot["Shoot"] -->|"GetBulletMove()"| IPool["IPoolManager<br/>(Singleton)"]
     IPool -->|"BulletMove"| Shoot
-
-    Shoot -->|"Init: dir / speed / dmg"| BulletMove
-    BulletMove -->|"Hit or range end"| IPool
-    IPool -->|"ReturnObject()"| Pool["PoolManager"]
+    
+    Shoot -->|"Init"| BulletMove["BulletMove"]
+    BulletMove -->|"Hit or Range End"| IPool
+    IPool -->|"ReturnBullet()"| Pool["PoolManager"]
+    
+    style IPool fill:#e1f5fe
+    style Pool fill:#c8e6c9
 ```
 
 #### 핵심 구현
@@ -480,8 +486,14 @@ public class PoolManager : MonoBehaviour, IPoolManager
 
 ```mermaid
 flowchart TD
-    UnitManager --> |Player Position|SpawnPointCalculator
-    SpawnPointCalculator --> |Spawn Point|UnitManager
+    UM["UnitManager"] --> SPC["SpawnPointCalculator"]
+    SPC --> UM
+    
+    UM --> PM["PoolManager"]
+    PM --> Enemy["Enemy"]
+    
+    style SPC fill:#e1f5fe
+    style UM fill:#c8e6c9
 ```
 
 #### 핵심구현
@@ -580,49 +592,35 @@ private static float GetMaxDistanceFromPlayer(Vector2 playerPos, Vector2 minPoin
 
 #### 구조도
 ```mermaid
-flowchart LR
-    subgraph Kill["1. 적 처치"]
-        P1[Player Kill]
-        UM1[UnitManager]
-        GM1[GameManager]
-        
-        P1 --> UM1
-        UM1 --> GM1
+flowchart TD
+    subgraph s1["① 적 처치"]
+        direction LR
+        P1["Player"] --> UM1["UnitManager"] --> GM1["GameManager"]
     end
     
-    subgraph LevelUp["2. 레벨업 체크"]
-        Check{레벨업?}
-        Pause[게임 멈춤]
-        
-        GM1 --> Check
-        Check --> |Yes|Pause
+    subgraph s2["② 레벨업 체크"]
+        direction TB
+        GM1 --> Check{"레벨업?"}
+        Check -->|Yes| Pause["게임 멈춤"]
     end
     
-    subgraph Select["3. 업그레이드 선택"]
-        SM1[StatManager]
-        SR[StatUpRepo]
-        UI[UIManager]
-        User[User Select]
-        
-        Pause --> SM1
-        SR -.-> SM1
-        SM1 --> |3개 옵션|UI
-        UI --> User
+    subgraph s3["③ 선택"]
+        direction LR
+        Pause --> SM1["StatManager"] --> UI["UIManager"] --> User["User"]
     end
     
-    subgraph Apply["4. 적용"]
-        GM2[GameManager]
-        SM2[StatManager]
-        UM2[UnitManager]
-        P2[Player]
-        Resume[게임 재개]
-        
-        User --> GM2
-        GM2 --> SM2
-        SM2 --> UM2
-        UM2 --> P2
-        P2 --> Resume
+    subgraph s4["④ 적용"]
+        direction LR
+        User --> GM2["GameManager"] --> SM2["StatManager"] --> UM2["UnitManager"] --> P2["Player"]
     end
+    
+    SR["StatUpRepo"] -.-> SM1
+    
+    style GM1 fill:#fff9c4
+    style GM2 fill:#fff9c4
+    style SM1 fill:#ffe0b2
+    style SM2 fill:#ffe0b2
+    style UI fill:#c8e6c9
 ```
 
 ---
@@ -732,9 +730,9 @@ private UpgradeOption CreateWeaponOption(WeaponStatUpData data)
 private List<UpgradeOption> SelectRandomOptions(List<UpgradeOption> source, int count)
 {
     if (count >= source.Count)
-        return new List(source);
+        return new List<UpgradeOption>(source);
     
-    List shuffled = new List(source);
+    List<UpgradeOption> shuffled = new List<UpgradeOption>(source);
     
     for (int i = shuffled.Count - 1; i > 0; i--)
     {
