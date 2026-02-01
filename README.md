@@ -193,7 +193,7 @@ public class PlayerInputProvider : IPlayerInput
 
 | 클래스 | 역할 | 코드 |
 |--------|------|------|
-| **IPlayerInput** | 입력 인터페이스 | [`보기`](Assets/Scripts/Core/Input/Interface/IPlayerInput.cs#L1-L12) |
+| **IPlayerInput** | 입력 인터페이스 | [`보기`](Assets/Scripts/Core/Input/Interface/IPlayerInput.cs) |
 | **PlayerInputProvider** | IPlayerInput 구현 | [`보기`](Assets/Scripts/Core/Input/Provider/PlayerInputProvider.cs) |
 | **PlayerInputReader** | Unity Input 연결 | [`보기`](Assets/Scripts/Core/Input/Reader/PlayerInputReader.cs) |
 | **InputManager** | 입력 관리 | [`보기`](Assets/Scripts/Core/GameLoop/InputManager.cs) |
@@ -756,7 +756,7 @@ private List<UpgradeOption> SelectRandomOptions(List<UpgradeOption> source, int 
 |--------|------|------|
 | **StatManager** | 스탯 계산/업그레이드 | [`보기`](Assets/Scripts/Core/GameLoop/StatManager.cs) |
 | **StatUpRepo** | 업그레이드 데이터 | [`보기`](Assets/Scripts/Data/ScriptableObject_DB/StatUpRepo.cs) |
-| **UpgradeOption** | 업그레이드 옵션 구조체 | [`보기`](Assets/Scripts/Data/UpgradeOption.cs) |
+| **UpgradeOption** | 업그레이드 옵션 구조체 | [`보기`](Assets/Scripts/Data/StatData/UpgradeOption.cs) |
 | **GameManager** | 레벨업 처리 | [`보기`](Assets/Scripts/Core/GameLoop/GameManager.cs) |
 
 </details>
