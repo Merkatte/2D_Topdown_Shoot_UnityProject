@@ -38,9 +38,10 @@ flowchart TD
     Movement --> Rigidbody2D
     Dash --> Rigidbody2D
 
-    Player["Player (MonoBehaviour)"]
+    Player["Player - MonoBehaviour"]
     Player --> Movement
     Player --> Dash
+```
 
 ### 1. 로그라이크 레벨업 시스템
 - 랜덤 업그레이드 옵션 생성 (Percentage/Plus)
