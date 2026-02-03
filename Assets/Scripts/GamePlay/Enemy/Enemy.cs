@@ -46,6 +46,11 @@ public class Enemy : MonoBehaviour
     {
         if (!_isReady) return;
 
+        Move();
+    }
+
+    protected virtual void Move()
+    {
         rigidBody2D.linearVelocity = DirectionToTarget() * _myStatData.MoveSpeed;
     }
 
