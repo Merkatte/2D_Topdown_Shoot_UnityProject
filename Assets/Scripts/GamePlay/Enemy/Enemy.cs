@@ -83,7 +83,7 @@ public class Enemy : MonoBehaviour
     {
         _myHP -= damage;
         if (_myHP <= 0)
-            OnDie();
+            OnDie(); 
     }
 
     void OnDie()

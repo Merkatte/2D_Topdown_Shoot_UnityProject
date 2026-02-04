@@ -3,11 +3,17 @@ using UnityEngine;
 
 public class DataManager : MonoBehaviour
 {
+    [Header("PlayerData")]
     [SerializeField] private PlayerRepo playerRepo;
     [SerializeField] private WeaponRepo weaponRepo;
-    [SerializeField] private EnemyRepo enemyRepo;
     [SerializeField] private LevelRepo levelRepo;
     [SerializeField] private StatUpRepo statUpRepo;
+    
+    [Header("EnemyData")]
+    [SerializeField] private EnemyRepo enemyRepo;
+    [SerializeField] private EnemyRepo rangedEnemyRepo;
+
+    [Header("Wave and SpawnData")]
     [SerializeField] private SpawnRepo spawnRepo;
     [SerializeField] private WaveRepo waveRepo;
     #region Init
