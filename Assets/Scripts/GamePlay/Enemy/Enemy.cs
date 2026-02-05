@@ -8,8 +8,8 @@ public class Enemy : MonoBehaviour
     [SerializeField] private Rigidbody2D rigidBody2D;
     [SerializeField] private GameObject healthBarAnchor;
     
-    private EnemyStatData _myStatData;
-    private GameObject _myTargetObject;
+    protected EnemyStatData _myStatData;
+    protected GameObject _myTargetObject;
 
     private float _myHP;
     private bool _isReady = false;
